@@ -1,0 +1,253 @@
+@import url("colors.css");
+
+body {
+    margin: 0;
+    overflow-x: hidden;
+}
+
+main {
+    margin: 0;
+    width: 100%;
+    list-style: none;
+
+    display: flex;
+    flex-direction: column;
+}
+
+section {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 400px;
+    padding-top: 100px;
+}
+
+section:not(:first-of-type) {
+    padding-top: 25rem;
+}
+
+.spacer {
+    position: absolute;
+    bottom: 0;
+    aspect-ratio: 960/300;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.reveal {
+    --skew: 0;
+    position: relative;
+    transform: translateY(150px) skewX(var(--skew));
+    opacity: 0;
+    transition: 1s all ease;
+}
+
+.reveal.active {
+    transform: translateY(0) skewX(0);
+    opacity: 1;
+}
+
+
+/*  ---------------------------------------------------------------------------
+    Individual Sections
+----------------------------------------------------------------------------- */
+
+/* Section 1*/
+
+section#layer1 {
+    min-height: 90vh;
+}
+
+section#layer1 {
+    background-image: linear-gradient(
+            rgba(0, 0, 0, 0),
+            rgba(0, 0, 0, 0)
+    ),
+    url("../images/waves/waves2.svg");
+
+    background-position: center;
+    background-repeat: repeat;
+    background-size: cover;
+    position: relative;
+    /*animation: layer1-expand 1.5s cubic-bezier(1, .01, .54, .82);*/
+}
+
+
+@keyframes layer1-expand {
+    0% {
+        min-height: 120vh;
+    }
+    100% {
+        min-height: 90vh;
+    }
+}
+
+@keyframes layer1-get-started {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+#get-started {
+    position: absolute;
+    font-size: 3rem;
+    top: 40%;
+    background: none;
+    border: solid .2rem var(--font-color);
+    border-radius: 10px;
+    padding: .6rem;
+    font-style: italic;
+    transition: all 200ms ease-in-out;
+    z-index: 999;
+    animation: layer1-get-started 1.5s cubic-bezier(1, .02, 1, .02);
+}
+
+#get-started:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+@keyframes arrow {
+    0% {
+        left: 0%;
+    }
+    50% {
+        left: .1rem;
+    }
+    100% {
+        left: 0%;
+    }
+}
+
+#get-started .arrow {
+    animation: infinite arrow 1s;
+}
+
+
+/* Title */
+#title {
+    display: flex;
+}
+
+#title h1 {
+    font-size: 8rem;
+    font-style: italic;
+    font-weight: normal;
+    z-index: 999;
+    transform: translateY(-90%);
+    animation: 1 title-dropin 1s cubic-bezier(.31, .02, .14, 1.42);
+}
+
+#title .description {
+    font-size: 2rem;
+    animation: 1 title-dropin-description 1.6s ease-in-out;
+}
+
+@keyframes title-dropin {
+    0% {
+        opacity: 0;
+        filter: motionBlur(10px);
+        transform: translate(-100%, -90%);
+    }
+    100% {
+        opacity: 100%;
+        transform: translate(0%, -90%);
+    }
+}
+
+@keyframes title-dropin-description {
+    0% {
+        opacity: 0;
+        transform: translate(-100%, 0%);
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 100%;
+        transform: translate(0%, 0%);
+    }
+}
+
+section#layer2 {
+    background: var(--color5);
+}
+
+#why {
+    display: flex;
+    align-items: center;
+    margin-top: -20rem;
+}
+
+#why h1 {
+    text-align: right;
+    font-size: 5rem;
+    transition: all 900ms ease-in-out;
+    position: relative;
+    right: 3rem;
+    transform: none;
+}
+
+#why h1::after {
+    content: "";
+    position: absolute;
+    width: .3rem;
+    height: 100%;
+    transform: scaleY(2.1);
+    background: var(--color0);
+    transition: transform 1000ms 500ms ease-in-out;
+}
+
+#why:not(.active) h1::after {
+    transform: scale(0);
+}
+
+#why:not(.active) h1 {
+    right: 0;
+    font-size: 4rem;
+}
+
+#why p {
+    margin-left: -2.1rem;
+    transition: all 100ms ease-in-out;
+    max-width: 30rem;
+}
+
+
+#transition {
+    background-image: url("../images/waves/transition_secondary.svg");
+    position: fixed;
+
+    z-index: 9999;
+    /*aspect-ratio: 3/2;*/
+
+    background-size: cover;
+    height: 20rem;
+    width: 100%;
+    /*height: 100%;*/
+
+    background-repeat: no-repeat;
+
+    transform: translateY(-100%);
+    transition: 900ms ease-in-out;
+}
+
+#transition.active {
+    transform: translateY(300%);
+}
+
+#transition::before {
+    content: "";
+    position: absolute;
+    transform: translateY(-100%);
+    background: var(--color0);
+    height: 150vh;
+    width: 100%;
+}

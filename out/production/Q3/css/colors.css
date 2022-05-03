@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;1,300;1,400;1,500&display=swap');
+
+:root {
+    --color0: #304966ff;
+    --color1: #435373ff;
+    --color2: #515575ff;
+    --color3: #6d597aff;
+    --color4: #b56576ff;
+    --color5: #e56b6fff;
+    --color6: #e88c7dff;
+    --color7: #eaac8bff;
+    --color8: #f0c1a9ff;
+
+    --secondary1: #E9F5DBff;
+    --secondary2: #DCEBCAff;
+    --secondary3: #CFE1B9ff;
+    --secondary4: #C2D5AAff;
+    --secondary5: #B5C99Aff;
+    --secondary6: #A6B98Bff;
+    --secondary7: #97A97Cff;
+    --secondary8: #8FA173ff;
+    --secondary9: #87986Aff;
+    --secondary10: #718355ff;
+
+
+    --font-color: #eaf0f3;
+    color: var(--font-color);
+
+    --gradient-top: linear-gradient(0deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-right: linear-gradient(90deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-bottom: linear-gradient(180deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-left: linear-gradient(270deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-top-right: linear-gradient(45deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-bottom-right: linear-gradient(135deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-top-left: linear-gradient(225deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-bottom-left: linear-gradient(315deg, #304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+    --gradient-radial: radial-gradient(#304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
+
+    transition: all 200ms ease-in-out;
+
+}
+
+html {
+    scroll-behavior: smooth;
+    color-scheme: dark !important;
+}
+
+body {
+    background: var(--color0);
+}
+
+* {
+    font-family: 'Open Sans', sans-serif;
+}
