@@ -1,0 +1,47 @@
+@import url("../colors.css");
+
+#accountBar {
+    position: fixed;
+    left: 0;
+    top: 1rem;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    align-content: center;
+
+    padding: 1rem;
+    font-size: 2rem;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+    background: url("../../images/accountBar.svg") center;
+    background-size: cover;
+}
+
+#accountBar-name {
+    margin-right: 2rem;
+    font-weight: bold;
+    filter: drop-shadow(-1px 1px 5px black);
+}
+
+#accountBar-logout {
+    margin: 0;
+    padding: 0;
+}
+
+#accountBar-logout input[type="submit"] {
+    font-size: inherit;
+    width: 101%;
+    height: 100%;
+    border: none;
+    border-radius: 10px;
+    transition: 150ms ease-in-out;
+}
+
+#accountBar-logout input[type="submit"]:hover {
+    filter: drop-shadow(-1px 1px 5px black);
+    cursor: pointer;
+}

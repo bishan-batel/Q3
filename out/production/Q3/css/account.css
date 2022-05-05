@@ -2,149 +2,43 @@
 
 body {
     margin: 0;
-    overflow-x: hidden;
-    animation: fade-in 500ms ease-in-out;
-
-}
-
-@keyframes fade-in {
-    from {
-        opacity: 0%;
-    }
-    to {
-        opacity: 100%;
-    }
 }
 
 main {
-    margin: 0;
-    position: absolute;
-
-    left: 50%;
-    top: 50%;
-
-    width: 40%;
-    height: 80%;
-    padding: 10px;
-
-    overflow: hidden;
-
-    transform: translate(-50%, -50%);
-
-
-    border-radius: 20px;
-
-    transition: all 200ms ease-in-out;
-}
-
-#main-bg {
-    z-index: -1;
     position: absolute;
     width: 100%;
     height: 100%;
-    border-radius: 20px;
 
-    background-position: center;
-    background-image: url("../images/waves/waves2.svg");
-    background-repeat: repeat;
-    /*background-size: cover;*/
-    animation: hue infinite 10s linear;
-}
-
-@keyframes hue {
-    from {
-
-        filter: blur(5px) hue-rotate(0deg);
-    }
-    to {
-        filter: blur(5px) hue-rotate(360deg);
-    }
-}
-
-#bg {
-    z-index: -1;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 20px;
-
-    background-position: center;
-    background-image: url("../images/waves/blob.svg");
-    background-repeat: no-repeat;
+    background: url("../images/blob/blob1.svg") center;
     background-size: cover;
-
-
-    /*filter: blur(2px);*/
 }
 
-main.active {
-    border-radius: 20px;
+dialog#error::backdrop {
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(20px);
 }
 
-
-form {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    flex-direction: column;
-    text-align: center;
-    height: 100%;
-    filter: dropShadow(black 10px 10px 2px);
-}
-
-.login-field:first-of-type {
-    margin-top: 4rem;
-}
-
-.login-field {
+#signup {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    width: 40rem;
+}
+
+#signup label {
+    font-size: 2rem;
+}
+
+#signup input {
+    font-size: 1.5rem;
     margin-bottom: 1rem;
-    font-size: 2.5rem;
-
-    border: transparent .5rem solid;
-    padding: 1rem;
-
-    transition: 200ms ease-in-out;
 }
 
-.login-field:focus-within {
-    padding-right: 2rem;
-    padding-left: 2rem;
-    border-radius: 10px;
-    border: white 3px solid;
+#signup input[type="submit"] {
+    width: 8rem;
 }
 
-.login-field input {
-    color: #051d13;
-    background: #ecfeff;
-    font-size: 1rem;
-    border: none;
-}
-
-#submission {
+#signup #names {
     display: flex;
-    width: 100%;
-
-    justify-content: center;
-}
-
-#submission input {
-    /*background: var(--color3);*/
-    background: transparent;
-    font-size: 3rem;
-    margin: .5rem;
-    border-radius: 5px;
-    border: transparent 3px solid;
-
-    transition: 200ms ease-in-out;
-}
-
-#submission input:hover {
-    /*transform: scale(1.1);*/
-    border: white 3px solid;
-
-    cursor: pointer;
 }

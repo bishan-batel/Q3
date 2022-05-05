@@ -29,6 +29,7 @@ public final class Db {
             "firstName varchar(256)",
             "lastName varchar(256)"
     );
+
     public static final SQLTableInfo SESSIONS = new SQLTableInfo(
             "Sessions", // name
             "token varchar(256) PRIMARY KEY NOT NULL", //token
@@ -52,6 +53,16 @@ public final class Db {
             "id varchar(32) NOT NULL PRIMARY KEY",
             "ownerId varchar(32) NOT NULL",
             "name varchar(256) NOT NULL"
+    );
+
+    public static final SQLTableInfo ASSIGNMENTS_LOG = new SQLTableInfo(
+            "Classrooms",
+            "id varchar(32) NOT NULL PRIMARY KEY",
+            "classroomId varchar(32) NOT NULL",
+            "name varchar(256) NOT NULL",
+            "minimumQuestions int NOT NULL",
+            "minimumAccuracy double NOT NULL",
+            "due datetime"
     );
 
     public static void main(String[] args) throws SQLException {

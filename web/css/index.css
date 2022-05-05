@@ -38,19 +38,6 @@ section:not(:first-of-type) {
     background-size: cover;
 }
 
-.reveal {
-    --skew: 0;
-    position: relative;
-    transform: translateY(150px) skewX(var(--skew));
-    opacity: 0;
-    transition: 1s all ease;
-}
-
-.reveal.active {
-    transform: translateY(0) skewX(0);
-    opacity: 1;
-}
-
 
 /*  ---------------------------------------------------------------------------
     Individual Sections
@@ -106,6 +93,7 @@ section#layer1 {
     font-style: italic;
     transition: all 200ms ease-in-out;
     z-index: 999;
+    color: var(--font-color);
     animation: layer1-get-started 1.5s cubic-bezier(1, .02, 1, .02);
 }
 

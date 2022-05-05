@@ -23,8 +23,7 @@ import java.sql.Statement;
 /**
  * Wrapper class used to create, connect, and manage a single SQL database
  */
-public class SQLDb implements Closeable
-{
+public class SQLDb implements Closeable {
 
 	private final String dbName;
 	private Connection dbConn;
@@ -35,8 +34,7 @@ public class SQLDb implements Closeable
 	 * @param dbName Database
 	 * @throws java.sql.SQLException
 	 */
-	public SQLDb(String dbName) throws SQLException
-	{
+	public SQLDb(String dbName) throws SQLException {
 		this(dbName, "");
 	}
 
@@ -50,8 +48,7 @@ public class SQLDb implements Closeable
 	 * @throws java.sql.SQLException
 	 */
 	@SuppressWarnings("OverridableMethodCallInConstructor")
-	public SQLDb(String dbName, String connectionURLAppend) throws SQLException
-	{
+	public SQLDb(String dbName, String connectionURLAppend) throws SQLException {
 		this.dbName = dbName;
 		setDbConn(connectionURLAppend);
 	}
@@ -63,15 +60,11 @@ public class SQLDb implements Closeable
 	 * @return Created/Existing database
 	 * @throws java.sql.SQLException
 	 */
-	public static SQLDb createNewDb(String name) throws SQLException
-	{
-		try (SQLDb db = new SQLDb(""))
-		{
+	public static SQLDb createNewDb(String name) throws SQLException {
+		try (SQLDb db = new SQLDb("")) {
 			db.exec(format("CREATE DATABASE %s", name));
-		} catch (SQLException err)
-		{
-			if (!err.getMessage().trim().endsWith("database exists"))
-			{
+		} catch (SQLException err) {
+			if (!err.getMessage().trim().endsWith("database exists")) {
 				throw err;
 			}
 		}
@@ -87,13 +80,11 @@ public class SQLDb implements Closeable
 	 * @param table Table information
 	 * @throws java.sql.SQLException
 	 */
-	public void createTable(SQLTableInfo table) throws SQLException
-	{
+	public void createTable(SQLTableInfo table) throws SQLException {
 		exec(format("CREATE TABLE %s (%s)", table.getName(), table.getFullColumns()));
 	}
 
-	public void recreateTable(SQLTableInfo table) throws SQLException
-	{
+	public void recreateTable(SQLTableInfo table) throws SQLException {
 		ignoreSQLErr(() -> dropTable(table));
 		createTable(table);
 	}
@@ -105,8 +96,7 @@ public class SQLDb implements Closeable
 	 * @return
 	 * @throws java.sql.SQLException
 	 */
-	public String[][] selectAllFromTable(SQLTableInfo table) throws SQLException
-	{
+	public String[][] selectAllFromTable(SQLTableInfo table) throws SQLException {
 		return selectWhere(table, "1=1");
 	}
 
@@ -121,20 +111,19 @@ public class SQLDb implements Closeable
 	 * @throws java.sql.SQLException
 	 */
 	public String[][] selectWhere(
-		SQLTableInfo table,
-		String where,
-		Object... preparedValues
-	) throws SQLException
-	{
+					SQLTableInfo table,
+					String where,
+					Object... preparedValues
+	) throws SQLException {
 		ResultSet result = execPreparedWithResult(
-			// formats table name and where clause into SQL statement unsafely
-			format(
-				"SELECT * FROM %s WHERE %s",
-				table.getName(),
-				where
-			),
-			// safely stores prepared values into statement
-			preparedValues
+						// formats table name and where clause into SQL statement unsafely
+						format(
+										"SELECT * FROM %s WHERE %s",
+										table.getName(),
+										where
+						),
+						// safely stores prepared values into statement
+						preparedValues
 		);
 
 		// converts result set to arraylist then 2D array
@@ -147,8 +136,7 @@ public class SQLDb implements Closeable
 	 * @param info Table Information
 	 * @throws java.sql.SQLException
 	 */
-	public void dropTable(SQLTableInfo info) throws SQLException
-	{
+	public void dropTable(SQLTableInfo info) throws SQLException {
 		dropTable(info.getName());
 	}
 
@@ -158,8 +146,7 @@ public class SQLDb implements Closeable
 	 * @param name Table name
 	 * @throws java.sql.SQLException
 	 */
-	public void dropTable(String name) throws SQLException
-	{
+	public void dropTable(String name) throws SQLException {
 		exec(format("DROP TABLE %s", name));
 	}
 
@@ -170,17 +157,14 @@ public class SQLDb implements Closeable
 	 * @param vals  Values to insert into table (order will match up to column)
 	 * @throws java.sql.SQLException
 	 */
-	public void insert(SQLTableInfo table, Object... vals) throws SQLException
-	{
+	public void insert(SQLTableInfo table, Object... vals) throws SQLException {
 		Arrays.stream(vals).forEach(System.out::println);
 		String prepared = "";
 
-		if (vals.length != 0)
-		{
+		if (vals.length != 0) {
 			StringBuilder preparedBuilder = new StringBuilder();
 			// repeats ', ?' to prepared
-			for (int i = 0; i < table.getColumnCount(); i++)
-			{
+			for (int i = 0; i < table.getColumnCount(); i++) {
 				preparedBuilder.append(", ?");
 			}
 			prepared = preparedBuilder.substring(1);
@@ -199,9 +183,13 @@ public class SQLDb implements Closeable
 	 * @throws java.sql.SQLException
 	 */
 	public void deleteWhere(SQLTableInfo table, String condition, Object... vals)
-		throws SQLException
-	{
+					throws SQLException {
 		execPrepared(format("DELETE FROM %s WHERE %s", table.getName(), condition), vals);
+	}
+
+	public void updateWhere(SQLTableInfo table, String set, String where, Object... vals)
+					throws SQLException {
+		execPrepared(format("UPDATE %s SET %s WHERE %s", table.getName(), set, where), vals);
 	}
 
 	// Statement executors (Raw) ------------------------------------------------
@@ -213,8 +201,7 @@ public class SQLDb implements Closeable
 	 * @param vals      Values to be substituted in statement
 	 * @throws java.sql.SQLException
 	 */
-	public void execPrepared(String statement, Object... vals) throws SQLException
-	{
+	public void execPrepared(String statement, Object... vals) throws SQLException {
 		execPreparedWithResult(statement, vals);
 	}
 
@@ -226,22 +213,18 @@ public class SQLDb implements Closeable
 	 * @return
 	 * @throws java.sql.SQLException
 	 */
-	public ResultSet execPreparedWithResult(String query, Object... vals) throws SQLException
-	{
+	public ResultSet execPreparedWithResult(String query, Object... vals) throws SQLException {
 		PreparedStatement statement = dbConn.prepareStatement(query);
 
-		for (int i = 0; i < vals.length; i++)
-		{
+		for (int i = 0; i < vals.length; i++) {
 			statement.setObject(i + 1, vals[i]);
 		}
 
 		// Prints to err stream if statement failed
-		try
-		{
+		try {
 			statement.execute();
 			debugPrintQuery(query);
-		} catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			debugPrintQueryErr(query);
 			throw e;
 		}
@@ -255,20 +238,17 @@ public class SQLDb implements Closeable
 	 * @return
 	 * @throws java.sql.SQLException
 	 */
-	public ResultSet execWithResult(String query) throws SQLException
-	{
+	public ResultSet execWithResult(String query) throws SQLException {
 		Statement statement = dbConn.createStatement();
 
 		// Prints to err stream if statement failed
-		try
-		{
+		try {
 			statement.execute(query);
 			debugPrintQuery(query);
 
 			// (if statement ran) returns result set
 			return statement.getResultSet();
-		} catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			debugPrintQueryErr(query);
 
 			// throws inside catch block just because I want to be able to log when the error
@@ -283,23 +263,19 @@ public class SQLDb implements Closeable
 	 * @param statement SQL Statement to be executed
 	 * @throws java.sql.SQLException
 	 */
-	public void exec(String statement) throws SQLException
-	{
+	public void exec(String statement) throws SQLException {
 		execWithResult(statement);
 	}
 
-	protected void debugPrintQuery(String q)
-	{
+	protected void debugPrintQuery(String q) {
 		debugPrintQuery(false, q);
 	}
 
-	protected void debugPrintQueryErr(String q)
-	{
+	protected void debugPrintQueryErr(String q) {
 		debugPrintQuery(true, q);
 	}
 
-	protected void debugPrintQuery(boolean err, String q)
-	{
+	protected void debugPrintQuery(boolean err, String q) {
 		PrintStream stream = err ? System.err : System.out;
 
 		// debug prints the query
@@ -307,98 +283,72 @@ public class SQLDb implements Closeable
 	}
 
 	// Setters & Getters --------------------------------------------------------
-	public String getDbName()
-	{
+	public String getDbName() {
 		return dbName;
 	}
 
-	public Connection getDbConn()
-	{
+	public Connection getDbConn() {
 		return dbConn;
 	}
 
-	public final void setDbConn() throws SQLException
-	{
+	public final void setDbConn() throws SQLException {
 		setDbConn("");
 	}
 
-	public final void setDbConn(String urlExtensions) throws SQLException
-	{
-		String connectionURL = "jdbc:mysql://localhost:"
-			+ Db.PORT
-			+ "/" + this.dbName
-			+ urlExtensions + "?useSSL=false";
+	public final void setDbConn(String urlExtensions) throws SQLException {
+		String connectionURL = String.format("jdbc:mysql://localhost:%d/%s%s?useSSL=false", Db.PORT, dbName, urlExtensions);
 		dbConn = null;
 
-//		System.out.println(connectionURL);
-
-		try
-		{
+		try {
 //      Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			dbConn = DriverManager.getConnection(connectionURL, Db.SQL_USER, Db.SQL_PASS);
-		} catch (ClassNotFoundException ex)
-		{
+		} catch (ClassNotFoundException ex) {
 			System.err.println("SQL Driver not found");
-		} catch (SQLSyntaxErrorException sse)
-		{
+		} catch (SQLSyntaxErrorException sse) {
 			sse.printStackTrace();
 		}
 	}
 
-	public ArrayList<ArrayList<String>> resultToList2D(ResultSet rs, String... tableHeaders)
-	{
+	public ArrayList<ArrayList<String>> resultToList2D(ResultSet rs, String... tableHeaders) {
 		ArrayList<ArrayList<String>> data = new ArrayList<>();
 
-		try
-		{
+		try {
 			// loops through result query to store into data
-			while (rs.next())
-			{
+			while (rs.next()) {
 				ArrayList<String> row = new ArrayList<>();
 
 				// loops through each column to add to record
-				for (String tableHeader : tableHeaders)
-				{
+				for (String tableHeader : tableHeaders) {
 					// gets data for column
 					row.add(rs.getString(tableHeader));
 				}
 
 				data.add(row); // adds column to row
 			}
-		} catch (SQLException se)
-		{
+		} catch (SQLException se) {
 			System.err.println("SQL Err: Not able to get data");
 		}
 
 		return data;
 	}
 
-	/**
-	 * @param runnable
-	 */
-	public void ignoreSQLErr(IgnoreSQLRunnable runnable)
-	{
+	public void ignoreSQLErr(IgnoreSQLRunnable runnable) {
 		ignoreSQLErr(runnable, false);
 	}
 
-	public void ignoreSQLErr(IgnoreSQLRunnable runnable, boolean debug)
-	{
-		try
-		{
+	public void ignoreSQLErr(IgnoreSQLRunnable runnable, boolean debug) {
+		try {
 			runnable.run();
-		} catch (SQLException e)
-		{
-			if (debug)
-			{
+		} catch (SQLException e) {
+			if (debug) {
 				e.printStackTrace();
 			}
 		}
 	}
 
 	@FunctionalInterface
-	public interface IgnoreSQLRunnable
-	{
+	public interface IgnoreSQLRunnable {
 
 		void run() throws SQLException;
 	}
@@ -408,17 +358,13 @@ public class SQLDb implements Closeable
 	 *
 	 * @return
 	 */
-	public boolean isConnected()
-	{
-		if (dbConn == null)
-		{
+	public boolean isConnected() {
+		if (dbConn == null) {
 			return false;
 		}
-		try
-		{
+		try {
 			return dbConn.isClosed();
-		} catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			return false;
 		}
 	}
@@ -428,15 +374,11 @@ public class SQLDb implements Closeable
 	 * object
 	 */
 	@Override
-	public void close()
-	{
-		if (isConnected())
-		{
-			try
-			{
+	public void close() {
+		if (isConnected()) {
+			try {
 				dbConn.close();
-			} catch (SQLException e)
-			{
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
@@ -450,24 +392,21 @@ public class SQLDb implements Closeable
 	 * @param arr Array to stringify
 	 * @return
 	 */
-	public static String toStringSeperatedByCommas(Object[] arr)
-	{
+	public static String toStringSeperatedByCommas(Object[] arr) {
 		// Empty array -> empty string
-		if (arr.length == 0)
-		{
+		if (arr.length == 0) {
 			return "";
 		}
 
 		// Creates %s for every object then formats them in
 		String formatIn = "";
-		for (int i = 0; i < arr.length; i++)
-		{
+		for (int i = 0; i < arr.length; i++) {
 			formatIn += ",%s";
 		}
 		return String.format(
-			formatIn
-				.substring(1), // removes leading comma
-			arr
+						formatIn
+										.substring(1), // removes leading comma
+						arr
 		);
 	}
 
@@ -477,28 +416,24 @@ public class SQLDb implements Closeable
 	 * @param data 2D Array list to convert, assumed to be not null
 	 * @return
 	 */
-	public static String[][] to2dArray(ArrayList<ArrayList<String>> data)
-	{
-		if (data.isEmpty())
-		{
+	public static String[][] to2dArray(ArrayList<ArrayList<String>> data) {
+		if (data.isEmpty()) {
 			return new String[0][0];
 		}
 
 		String[][] arr = new String[data.size()][data.get(0).size()];
 
-		for (int i = 0; i < data.size(); i++)
-		{
-			for (int j = 0; j < data.get(0).size(); j++)
-			{
+		for (int i = 0; i < data.size(); i++) {
+			for (int j = 0; j < data.get(0).size(); j++) {
 				arr[i][j] = data.get(i).get(j);
 			}
 		}
 		return arr;
 	}
 
-	public static void main(String[] args) throws SQLException
-	{
+	public static void main(String[] args) throws SQLException {
 		SQLDb db = new SQLDb(Db.NAME);
 		System.out.println(Arrays.deepToString(db.selectAllFromTable(Db.USERS)));
+		db.close();
 	}
 }

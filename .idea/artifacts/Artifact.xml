@@ -1,0 +1,20 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="Artifact">
+    <output-path>$PROJECT_DIR$/out/artifacts/Artifact</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="Q3" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="derby" />
+          <element id="library" level="project" name="javaee" />
+          <element id="library" level="project" name="Java EE 6-Java EE 6" />
+          <element id="library" level="project" name="gf-client" />
+          <element id="library" level="project" name="mysql-connector-java" />
+          <element id="library" level="project" name="jstl" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

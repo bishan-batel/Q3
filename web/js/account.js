@@ -1,7 +1,8 @@
-console.log("bruh")
-document
-        .querySelector("#authform")
-        .addEventListener('submit', ev => {
-            console.log(ev);
-            // ev.preventDefault();
-        });
+const dialog = document.querySelector("dialog#error");
+setTimeout(() => {
+    if (dialog) dialog.showModal();
+}, 1);
+
+function closeDialog() {
+    dialog.close();
+}

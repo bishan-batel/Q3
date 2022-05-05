@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;1,300;1,400;1,500&display=swap');
 
 :root {
+    --backdrop-blur: 2px;
+    --backdrop-color: rgba(48, 73, 102, 0.52);
+
     --color0: #304966ff;
     --color1: #435373ff;
     --color2: #515575ff;
@@ -37,18 +40,26 @@
     --gradient-radial: radial-gradient(#304966ff, #435373ff, #515575ff, #6d597aff, #b56576ff, #e56b6fff, #e88c7dff, #eaac8bff, #f0c1a9ff);
 
     transition: all 200ms ease-in-out;
-
+    font-family: 'Open Sans', sans-serif;
 }
 
 html {
     scroll-behavior: smooth;
-    color-scheme: dark !important;
 }
 
 body {
     background: var(--color0);
 }
 
-* {
-    font-family: 'Open Sans', sans-serif;
+.reveal {
+    --skew: 0;
+    position: relative;
+    transform: translateY(150px) skewX(var(--skew));
+    opacity: 0;
+    transition: 1s all ease;
+}
+
+.reveal.active {
+    transform: translateY(0) skewX(0);
+    opacity: 1;
 }
