@@ -4,8 +4,11 @@ import db.Db;
 import db.SQLDb;
 import utils.Guard;
 
+import javax.swing.text.html.Option;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Optional;
 
 public final class Teacher {
 	private final Account account;
@@ -25,12 +28,28 @@ public final class Teacher {
 		return account.getUid();
 	}
 
+	public boolean ownsClassroom(String classroomId) throws SQLException {
+		try (SQLDb db = new SQLDb(Db.NAME)) {
+			return db.selectWhere(Db.CLASSROOMS, "ownerId=? AND id=? LIMIT 1", getUid(), classroomId).length > 0;
+		}
+	}
+
 	public Classroom[] getClassrooms() throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			String[][] results = db.selectWhere(Db.CLASSROOMS, "ownerId=?", account.getUid());
 
 			// maps results to array of Classroom objects
 			return Arrays.stream(results).map(Classroom::new).toArray(Classroom[]::new);
+		}
+	}
+
+	public Optional<Classroom> getClassroomById(String id) throws SQLException {
+		try (SQLDb db = new SQLDb(Db.NAME)) {
+			String[][] results = db.selectWhere(Db.CLASSROOMS, "ownerId=? AND id=? LIMIT 1", account.getUid(), id);
+
+			if (results.length == 0)
+				return Optional.empty();
+			return Optional.of(new Classroom(results[0]));
 		}
 	}
 
@@ -53,4 +72,5 @@ public final class Teacher {
 			return db.selectWhere(Db.TEACHERS, "uid=? LIMIT 1", account.getUid()).length > 0;
 		}
 	}
+
 }

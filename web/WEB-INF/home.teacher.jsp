@@ -4,32 +4,61 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>TODO supply a title</title>
+    <title>Q3 Home</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="css/home.css"/>
+    <link rel="stylesheet" type="text/css" href="css/home.teacher.css"/>
     <script defer src="js/global.js"></script>
-    <script defer src="js/libs/jquery/jquery.min.js"></script>
+    <script defer src="js/home.teacher.js"></script>
 </head>
 <body>
 <main>
-    <%@ include file="components/accountBar.component.jsp" %>
+    <%@include file="components/accountBar.component.jsp" %>
+    <%@include file="components/indicators.jsp" %>
 
-    <ul id="classrooms">
+    <ul id="classroomList">
         <c:forEach var="classroom" items="${classrooms}">
-            ${classroom.name}
+            <li class="classroom">
+                <span class="classroomId" hidden>${classroom.id}</span>
+                <h2>
+                    <c:out value="${classroom.name}"/>
+                </h2>
+
+                <span class="studentCount">
+                    <c:catch var="studentCountFailure">
+                        <c:out value="${classroom.studentCount}"/> Students
+                    </c:catch>
+                    <c:if test="${studentCountFailure !=null}">
+                        Failed to get student count
+                    </c:if>
+                </span>
+            </li>
         </c:forEach>
+
+        <c:if test="${fn:length(classrooms) == 0}">
+            <span class="error">You have no classes.</span>
+        </c:if>
     </ul>
 
-    <
+    <div id="classControlPanel">
+        <button onclick="document.querySelector('#create-classroom').showModal()">
+            Create a new classroom
+        </button>
 
-    <button onclick="$('#create-classroom')[0].showModal()">Create a new
-        classroom
-    </button>
+
+        <button
+                onclick="document.querySelector('#delete-classroom').showModal()"
+                <c:if test="${fn:length(classrooms) == 0}">disabled</c:if>
+        >
+            Delete a Classroom
+        </button>
+    </div>
+
     <dialog id="create-classroom">
         <h1>Create a new Classroom</h1>
         <form method="post" action="home-create-classroom">
@@ -39,10 +68,35 @@
             <input type="submit" value="Create"/>
 
         </form>
-        <button class="closeButton" onclick="$('#create-classroom')[0].close()">
+        <button class="closeButton"
+                onclick="document.querySelector('#create-classroom').close()"
+        >
             Back
         </button>
     </dialog>
+
+    <c:if test="${fn:length(classrooms) > 0}">
+        <dialog id="delete-classroom">
+            <h1>Delete a Classroom</h1>
+            <form method="post" action="home-delete-classroom">
+                <label for="classroomToDelete">Name</label>
+                <select id="classroomToDelete" name="classroomId">
+                    <c:forEach var="classroom" items="${classrooms}">
+                        <option value="${classroom.id}">
+                            <c:out value="${classroom.name}"/>
+                        </option>
+                    </c:forEach>
+                </select>
+                <input type="submit" value="Delete"/>
+            </form>
+            <button class="closeButton"
+                    onclick="document.querySelector('#create-classroom').close()"
+            >
+                Close
+            </button>
+
+        </dialog>
+    </c:if>
 </main>
 </body>
 </html>

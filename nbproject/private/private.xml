@@ -3,7 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/bishan/NetBeansProjects/Q3/src/java/db/SQLDb.java</file>
+            <file>file:/home/bishan/NetBeansProjects/Q3/src/java/auth/Auth.java</file>
+            <file>file:/home/bishan/NetBeansProjects/Q3/src/java/utils/WebUtils.java</file>
+            <file>file:/home/bishan/NetBeansProjects/Q3/src/java/db/Db.java</file>
             <file>file:/home/bishan/NetBeansProjects/Q3/src/java/AuthController.java</file>
+            <file>file:/home/bishan/NetBeansProjects/Q3/src/java/auth/account/Student.java</file>
+            <file>file:/home/bishan/NetBeansProjects/Q3/src/java/auth/account/Teacher.java</file>
         </group>
     </open-files>
 </project-private>

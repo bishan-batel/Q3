@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;1,300;1,400;1,500&display=swap');
 
 :root {
+    --backdrop-blur: 2px;
+    --backdrop-color: rgba(48, 73, 102, 0.52);
+
     --color0: #304966ff;
     --color1: #435373ff;
     --color2: #515575ff;

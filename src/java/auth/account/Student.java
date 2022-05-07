@@ -5,6 +5,7 @@ import db.SQLDb;
 import utils.Guard;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 public final class Student {
 	private final Account account;
@@ -37,12 +38,42 @@ public final class Student {
 		}
 	}
 
+	public void requestToJoin(String id) {
+	}
+
 	public String getClassroomId() {
 		return classroomId;
 	}
 
+	public String getUid() {
+		return getAccount().getUid();
+	}
+
+	@Deprecated
 	public int getScore() {
 		return score;
+	}
+
+	public Optional<Classroom> getClassroom() throws SQLException {
+		try (SQLDb db = new SQLDb(Db.NAME)) {
+			String[][] results = db.selectWhere(Db.CLASSROOMS, "id=?", getClassroomId());
+			if (results.length == 0) return Optional.empty();
+			return Optional.of(new Classroom(results[0]));
+		}
+	}
+
+	public void sendJoinRequest(String classroomId) throws SQLException {
+		try (SQLDb db = new SQLDb(Db.NAME)) {
+			if (hasPendingJoinRequest(db)) {
+				db.updateWhere(Db.JOIN_REQUESTS, "classroomId=?", "uid=?", classroomId, getUid());
+			} else {
+				db.insert(Db.JOIN_REQUESTS, getUid(), classroomId);
+			}
+		}
+	}
+
+	private boolean hasPendingJoinRequest(SQLDb db) throws SQLException {
+		return db.selectWhere(Db.JOIN_REQUESTS, "uid=? LIMIT 1", getUid()).length == 0;
 	}
 
 	public static Student getFromAccount(Account account) throws SQLException {
@@ -64,4 +95,6 @@ public final class Student {
 			return db.selectWhere(Db.STUDENTS, "uid=? LIMIT 1", account.getUid()).length > 0;
 		}
 	}
+
+
 }

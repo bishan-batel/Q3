@@ -11,7 +11,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -19,10 +18,7 @@ import java.util.Optional;
 /**
  * @author bishan
  */
-@WebServlet(name = "HomeController", loadOnStartup = 1, urlPatterns = {
-				"/home",
-				"/home-create-classroom"
-})
+@WebServlet(name = "HomeController", loadOnStartup = 1, urlPatterns = {"/home", "/home-create-classroom", "/home-delete-classroom", "/classroom"})
 public class HomeController extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -30,7 +26,7 @@ public class HomeController extends HttpServlet {
 
 		try {
 			Optional<Account> possibleAccount =
-							Session.getAccountFromToken((String) req.getSession().getAttribute("token"));
+							Session.getAccountFromToken(AuthController.getToken(req).orElse(""));
 
 			// if has an account
 			if (possibleAccount.isPresent()) {
@@ -61,9 +57,29 @@ public class HomeController extends HttpServlet {
 				createClassroom(req, res, teacher);
 				return;
 
+			case "/home-delete-classroom":
+				deleteClassroom(req, res, teacher);
+				return;
+
 			default:
 				WebUtils.pageRedirect(req, res, "home");
 		}
+	}
+
+	private void deleteClassroom(HttpServletRequest req, HttpServletResponse res, Teacher teacher) throws SQLException, ServletException, IOException {
+		try {
+			String classroomId = req.getParameter("classroomId");
+			Guard.againstNullOrWhitespace(classroomId);
+
+			if (teacher.ownsClassroom(classroomId)) {
+				Classroom.deleteById(classroomId);
+			} else {
+				WebUtils.setError(req, "Invalid classroom id");
+			}
+		} catch (NullPointerException e) {
+			WebUtils.setError(req, "Invalid classroom id");
+		}
+		WebUtils.pageRedirect(req, res, "home");
 	}
 
 	private void createClassroom(HttpServletRequest req, HttpServletResponse res, Teacher teacher) throws SQLException, ServletException, IOException {
@@ -74,7 +90,7 @@ public class HomeController extends HttpServlet {
 
 			Classroom.createFor(teacher, name);
 		} catch (NullPointerException e) {
-			// ignored
+			WebUtils.setError(req, "Invalid classroom name");
 		}
 		WebUtils.pageRedirect(req, res, "home");
 	}
@@ -84,7 +100,7 @@ public class HomeController extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		try {
 			// checks if logged in
-			String token = (String) req.getSession().getAttribute("token");
+			String token = AuthController.getToken(req).orElse("");
 			Optional<Account> possibleAccount = Session.getAccountFromToken(token);
 
 			if (possibleAccount.isPresent()) {
@@ -92,9 +108,8 @@ public class HomeController extends HttpServlet {
 				req.setAttribute("account", acc);
 
 				if (Student.isStudent(acc))
-					handleStudent(req, res, acc);
-				else
-					handleTeacher(req, res);
+					handleStudentGet(req, res, Student.getFromAccount(acc));
+				else handleTeacherGet(req, res, Teacher.getFromAccount(acc));
 
 				return;
 			}
@@ -102,20 +117,51 @@ public class HomeController extends HttpServlet {
 			WebUtils.setError(req, "You must be logged in to access a home page");
 		} catch (SQLException e) {
 			WebUtils.setError(req, "Internal Server Error");
+			e.printStackTrace();
 		} catch (Exception e) {
 			WebUtils.setError(req, "Unknown Error");
+			e.printStackTrace();
 		}
+
+		AuthController.applyToken(res, "");
 		WebUtils.pageRedirect(req, res, "account");
 	}
 
-	private void handleTeacher(HttpServletRequest req, HttpServletResponse res)
-					throws ServletException, IOException {
-		WebUtils.redirect(req, res, WebUtils.webInf("home.teacher.jsp"));
+	private void handleTeacherGet(HttpServletRequest req, HttpServletResponse res, Teacher teacher) throws ServletException, IOException, SQLException {
+		req.setAttribute("teacher", teacher);
+
+		switch (req.getServletPath()) {
+			case "/classroom": {
+				Optional<Classroom> classroom = teacher.getClassroomById(req.getParameter("id"));
+
+				if (classroom.isPresent()) {
+					req.setAttribute("classroom", classroom.get());
+					WebUtils.redirect(req, res, WebUtils.webInf("classroom.teacher.jsp"));
+				} else {
+//					WebUtils.pageRedirect(req, res, "home");
+					WebUtils.setError(req, "Classroom does not exist");
+					WebUtils.pageRedirect(req, res, "home");
+				}
+
+				break;
+			}
+
+			case "/home": {
+				req.setAttribute("classrooms", teacher.getClassrooms());
+				WebUtils.redirect(req, res, WebUtils.webInf("home.teacher.jsp"));
+				break;
+			}
+
+			default:
+				WebUtils.pageRedirect(req, res, "home");
+				break;
+		}
 	}
 
-	private void handleStudent(HttpServletRequest req, HttpServletResponse res, Account account)
-					throws ServletException, IOException, SQLException {
-		req.setAttribute("student", Student.getFromAccount(account));
+	private void handleStudentGet(HttpServletRequest req, HttpServletResponse res, Student student) throws ServletException, IOException, SQLException {
+		req.setAttribute("student", student);
+
+		req.setAttribute("classroom", student.getClassroom());
 		WebUtils.redirect(req, res, WebUtils.webInf("home.student.jsp"));
 	}
 }

@@ -7,8 +7,7 @@ const onScroll = () => document
 
         try {
             let offset = ele.getAttribute("reveal-offset");
-            if (typeof (offset) == "number")
-                elementVisible += parseFloat(offset);
+            if (typeof (offset) == "number") elementVisible += parseFloat(offset);
         } catch (e) {
             console.error(e);
         }
@@ -25,6 +24,6 @@ onScroll();
 window.addEventListener("scroll", onScroll);
 
 function subForward(url) {
-    url = "Q3/" + url;
+    // url = "Q3/" + url;
     window.location.href = `${window.location.protocol}//${window.location.host}/${url}`;
 }

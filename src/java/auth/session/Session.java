@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public final class Session {
-	public final String token, uid;
+	private final String token, uid;
 
 	public Session(String[] row) {
 		this(Db.SESSIONS.getString(row, "token"), Db.SESSIONS.getString(row, "uid"));
@@ -41,7 +41,7 @@ public final class Session {
 	}
 
 	public static Optional<Account> getAccountFromSession(Session session) throws SQLException {
-		return getAccountFromToken(session.uid);
+		return getAccountFromToken(session.token);
 	}
 
 	public static Optional<Account> getAccountFromToken(String token) throws SQLException {

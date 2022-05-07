@@ -9,21 +9,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="css/account.css"/>
     <script defer src="js/global.js"></script>
-    <script defer src="js/account.js"></script>
 
 </head>
 <body>
 <main>
+    <%@include file="components/indicators.jsp" %>
 
-    <%--@elvariable id="error" type="java.lang.String"--%>
-    <c:if test="${error != null}">
-        <dialog id="error" class="reveal">
-            <c:out value="${error}"/>
-            <button onclick="closeDialog()">Close</button>
-        </dialog>
-        <%-- Clears --%>
-        <c:set var="error" scope="application" value="${null}"/>
-    </c:if>
     <form id="signup" method="post" action="register" class="reveal">
         <h1>Sign Up</h1>
         <label for="email-signup">Email</label>
@@ -51,7 +42,8 @@
         <label for="email-login">Email</label>
         <input required id="email-login" type="email" name="email" maxlength="254"/>
         <label for="password-login">Password</label>
-        <input required id="password-login" type="password" name="password" maxlength="254"/>
+        <input required id="password-login" type="password" name="password"
+               maxlength="254"/>
         <input type="submit" value="Log in"/>
     </form>
 </main>

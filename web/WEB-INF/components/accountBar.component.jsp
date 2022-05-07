@@ -5,10 +5,16 @@
 
 <link rel="stylesheet" type="text/css" href="css/components/accountBar.component.css"/>
 
-<nav id="accountBar" class="reveal">
+<nav id="accountBar">
     <span id="accountBar-name">
         <c:out value="${account.firstName}"/> <c:out value="${account.lastName}"/>
     </span>
+
+    <%--@elvariable id="teacher" type="auth.account.Teacher"--%>
+    <c:if test="${teacher != null}">
+        <a class="accountBar-redirect" href="/Q3/home">Classroom List</a>
+    </c:if>
+
     <form id="accountBar-logout" method="post" action="logout">
         <input type="submit" value="Logout"/>
     </form>

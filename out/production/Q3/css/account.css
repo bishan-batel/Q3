@@ -2,6 +2,7 @@
 
 body {
     margin: 0;
+    overflow: hidden;
 }
 
 main {
@@ -11,34 +12,69 @@ main {
 
     background: url("../images/blob/blob1.svg") center;
     background-size: cover;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-dialog#error::backdrop {
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(20px);
+#signup, #login {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    /*width: 100%;*/
+
+    position: relative;
+    top: -35%;
+    transform: translateY(50%);
+    background-size: cover;
+    background-position: center;
+
+    padding: 2.5rem;
+    margin: 5rem;
+
+    border-radius: 20px;
+    filter: drop-shadow(-10px 10px 10px rgba(0, 0, 0, 0.5));
+
+    transition: 150ms ease-in-out;
+}
+
+#signup:hover, #login:hover {
+    transform: translateY(calc(50% - 1rem));
+    filter: drop-shadow(-10px 10px 15px rgba(0, 0, 0, 0.5));
 }
 
 #signup {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 40rem;
+    background-image: url("../images/circles/circle1.svg");
 }
 
-#signup label {
+#login {
+    background-image: url("../images/circles/circle2.svg");
+}
+
+label {
     font-size: 2rem;
 }
 
-#signup input {
+input, select, option {
     font-size: 1.5rem;
     margin-bottom: 1rem;
 }
 
-#signup input[type="submit"] {
+input[type="submit"] {
     width: 8rem;
+    background: var(--color1);
+    color: var(--font-color);
+    border-radius: 15px;
+    font-size: 2rem;
+    text-align: center;
+    border: transparent solid 3px;
+    transition: 150ms ease-in-out;
 }
 
-#signup #names {
-    display: flex;
+input[type="submit"]:hover {
+    border: var(--font-color) solid 3px;
+    transform: scale(1.08);
+    cursor: pointer;
 }
