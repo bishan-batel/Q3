@@ -86,7 +86,7 @@ public class SaltedPassword {
       /*
 			 bruh whoever made java.security made it so that when you get a digest
 			 you need to handle a 'NoSuchAlgorithmException' in case the algorithm
-			 you specify (which is a STRING not a enum because why would we use enums)
+			 you specify (which is a STRING not an enum because why would we use enums)
        */
 		} catch (NoSuchAlgorithmException nsa) {
 			nsa.printStackTrace();
@@ -136,7 +136,6 @@ public class SaltedPassword {
 		for (int i = 0; i < salt.length(); i++) {
 			System.out.print((byte) salt.charAt(i) + ", ");
 		}
-
 		System.out.println();
 	}
 }

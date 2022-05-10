@@ -56,6 +56,7 @@ public final class Session {
 							),
 							token
 			);
+			db.close();
 			if (rows.length == 0) return Optional.empty();
 
 			return Optional.of(new Account(rows[0]));

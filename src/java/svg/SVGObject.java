@@ -2,46 +2,43 @@ package svg;
 
 import static java.lang.String.format;
 
-abstract class SVGObject<T>
-{
+public abstract class SVGObject<T> {
 
 	protected final String elementName;
-	private final StringBuilder properties;
-	private final StringBuilder inner;
+	protected final StringBuilder properties;
+	protected final StringBuilder inner;
 
-	public SVGObject(String name)
-	{
+	public SVGObject(String name) {
 		properties = new StringBuilder();
 		elementName = name;
 		inner = new StringBuilder();
 	}
 
-	public T writeInner(String data)
-	{
+	public T writeInner(String data) {
 		inner.append(data);
 		return (T) this;
 	}
 
-	public T writeProperty(String name, Object val)
-	{
+	public T writeProperty(String name, Object val) {
 		properties.append(format("%s=\"%s\" ", name, val.toString()));
 		return (T) this;
 	}
 
-	public T style(SVGStyle style)
-	{
-		return writeProperty("style", style.toString());
+	public T style(SVGStyle style) {
+		return writeProperty("style", style);
+	}
+
+	public T className(String className) {
+		return writeProperty("class", className);
 	}
 
 	@Override
-	public String toString()
-	{
-		if (properties.toString().isEmpty())
-		{
+	public String toString() {
+		if (inner.toString().isEmpty()) {
 
-			return format("<%s %s/>", elementName, inner);
+			return format("<%s %s/>", elementName, properties);
 		}
 		return format("<%s %s>%s</%s>", elementName, properties, inner,
-			elementName);
+						elementName);
 	}
 }

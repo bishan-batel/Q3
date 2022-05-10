@@ -77,6 +77,7 @@ public final class Auth {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			String[][] results = db.selectWhere(Db.USERS, "email=?", email);
 
+			db.close();
 			if (results.length == 0) {
 				return Optional.empty();
 			}

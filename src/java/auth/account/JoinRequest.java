@@ -7,8 +7,9 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class JoinRequest {
-	public final String uid;
+	private final String uid;
 	private String classroomId;
+	private Student cachedStudent;
 
 	JoinRequest(String[] row) {
 		this(
@@ -22,10 +23,21 @@ public class JoinRequest {
 		this.classroomId = classroomId;
 	}
 
+	public String getClassroomId() {
+		return classroomId;
+	}
+
 	public Student getStudent() throws SQLException {
+		return getStudent(true);
+	}
+
+	public Student getStudent(boolean allowCache) throws SQLException {
+		if (cachedStudent != null && allowCache) {
+			return cachedStudent;
+		}
 		Optional<Account> acc = Account.getFromId(getUid());
 		if (acc.isPresent())
-			return Student.getFromAccount(acc.get());
+			return cachedStudent = Student.getFromAccount(acc.get());
 		throw new IllegalStateException("Student does not exist for join request");
 	}
 
@@ -33,7 +45,17 @@ public class JoinRequest {
 		return uid;
 	}
 
-	public static void deleteAllForUser(Student student) throws SQLException {
+	public void accept() throws SQLException {
+		Student student = getStudent();
+		clearForUser(student);
+		student.changeClassroom(classroomId);
+	}
+
+	public void reject() throws SQLException {
+		clearForUser(getStudent());
+	}
+
+	public static void clearForUser(Student student) throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			db.deleteWhere(Db.JOIN_REQUESTS, "uid=?", student.getUid());
 		}

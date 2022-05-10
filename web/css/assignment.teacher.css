@@ -1,0 +1,52 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+main {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    top: 0;
+
+    background: url("../images/blob/blob1.svg") center;
+    background-size: cover;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+a {
+    text-decoration: inherit;
+    color: inherit;
+}
+
+#delete-classroom {
+    position: fixed;
+    right: 0;
+    top: 8rem;
+    background: #d93663;
+    margin: 0;
+    padding: 0;
+    transition: 150ms ease-in-out;
+}
+
+#delete-classroom > input {
+    color: var(--font-color);
+    background: none;
+    border: none;
+}
+
+#delete-classroom:hover {
+    background: #b32f53;
+    cursor: pointer;
+}
+
+#assignmentTitle {
+    position: absolute;
+    top: 5.5rem;
+    text-align: center;
+    font-size: 3rem;
+}

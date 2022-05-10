@@ -6,7 +6,10 @@ import utils.Guard;
 import utils.WebUtils;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class Classroom {
 	private final String id, ownerId, name;
@@ -46,14 +49,27 @@ public class Classroom {
 		}
 	}
 
-	public int getStudentCount() throws SQLException {
+	public Student[] getStudents() throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			return db.selectWhere(
+			String[][] results = db.selectWhere(
 							Db.STUDENTS,
-							"classroom=?",
+							"classroomId=?",
 							getId()
-			).length;
+			);
+
+			// I would use streams for this but the student constructor having an
+			// exception mucks things up
+			List<Student> students = new ArrayList<>();
+
+			for (String[] row : results)
+				students.add(new Student(row));
+
+			return students.toArray(new Student[0]);
 		}
+	}
+
+	public int getStudentCount() throws SQLException {
+		return getStudents().length;
 	}
 
 	/*
@@ -73,8 +89,21 @@ public class Classroom {
 		}
 	}
 
+	public Assignment[] getAssignments() throws SQLException {
+		String[][] result;
+		try (SQLDb db = new SQLDb(Db.NAME)) {
+			result = db.selectWhere(Db.ASSIGNMENTS, "classroomId=? ORDER BY dateDue DESC", getId());
+		}
+		return Arrays.stream(result)
+						.map(r -> {
+							System.out.println(Arrays.deepToString(r));
+							return new Assignment(r);
+						})
+						.toArray(Assignment[]::new);
+	}
+
 	public static Classroom createFor(Teacher teacher, String name) throws SQLException {
-		Guard.againstNull(teacher);
+		Guard.forNull(teacher);
 
 		String id = WebUtils.randomUID().substring(0, 6);
 
@@ -85,9 +114,16 @@ public class Classroom {
 		return new Classroom(id, teacher.getUid(), name);
 	}
 
-	public static boolean exists(String id) throws SQLException {
+	public static Optional<Classroom> getById(String id) throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			return db.selectWhere(Db.CLASSROOMS, "id=? LIMIT=1", id).length > 0;
+			String[][] result = db.selectWhere(Db.CLASSROOMS, "id=? LIMIT 1", id);
+			if (result.length == 0) {
+				db.close();
+				return Optional.empty();
+			}
+			db.close();
+			return Optional.of(new Classroom(result[0]));
 		}
 	}
+
 }

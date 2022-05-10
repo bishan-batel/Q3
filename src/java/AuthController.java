@@ -3,21 +3,20 @@ import auth.Auth;
 import auth.DuplicateEmailException;
 import auth.InvalidPasswordException;
 import auth.session.Session;
+import utils.Email;
 import utils.Guard;
 import utils.WebUtils;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Optional;
 import javax.security.auth.login.AccountNotFoundException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 /**
  * @author bishan
@@ -49,7 +48,13 @@ public class AuthController extends HttpServlet {
 
 	private void handleLogout(HttpServletRequest req, HttpServletResponse res)
 					throws ServletException, IOException {
-		req.getSession().setAttribute("token", null);
+		applyToken(res, null);
+
+		HttpSession session = req.getSession();
+		if (session != null) {
+			Enumeration<String> names = session.getAttributeNames();
+			while (names.hasMoreElements()) session.removeAttribute(names.nextElement());
+		}
 		WebUtils.pageRedirect(req, res, "account");
 	}
 
@@ -60,7 +65,7 @@ public class AuthController extends HttpServlet {
 			String password = req.getParameter("password");
 
 			// guards
-			Guard.againstNullOrWhitespace(email, password);
+			Guard.forNullOrWhitespace(email, password);
 
 			Session session = Auth.login(email, password);
 
@@ -80,8 +85,6 @@ public class AuthController extends HttpServlet {
 	}
 
 	private void handleRegister(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		String err;
-
 		try {
 			String email = req.getParameter("email");
 			String password = req.getParameter("password");
@@ -89,8 +92,9 @@ public class AuthController extends HttpServlet {
 			String lastName = req.getParameter("lastName");
 			String accountType = req.getParameter("accountType");
 
-			Guard.againstNullOrWhitespace(email, password, firstName, lastName, accountType);
-			Guard.clamp(accountType, "student", "teacher");
+			Guard.forNullOrWhitespace(email, password, firstName, lastName, accountType);
+			Guard.whitelist(accountType, "student", "teacher");
+			if (!Email.isValid(email)) throw new IllegalArgumentException();
 
 			Session session = Auth.register(
 							email,
@@ -104,15 +108,14 @@ public class AuthController extends HttpServlet {
 			WebUtils.pageRedirect(req, res, "home");
 			return;
 		} catch (DuplicateEmailException e) {
-			err = "Email already has an account attached";
+			WebUtils.setError(req, "Email already has an account attached");
 		} catch (NullPointerException | IllegalArgumentException e) {
-			err = "Invalid form data";
+			WebUtils.setError(req, "Invalid form data");
 			e.printStackTrace();
 		} catch (Exception e) {
-			err = "Internal Server";
+			WebUtils.setError(req, "Internal Server");
 		}
 
-		req.getServletContext().setAttribute("error", err);
 		WebUtils.pageRedirect(req, res, "account");
 	}
 
@@ -128,6 +131,8 @@ public class AuthController extends HttpServlet {
 	}
 
 	public static Optional<String> getToken(HttpServletRequest req) {
+		Cookie[] cookies = req.getCookies();
+		if (cookies == null || cookies.length == 0) return Optional.empty();
 		return Arrays.stream(req.getCookies())
 						.filter(cookie -> cookie.getName().equals("token"))
 						.findFirst()
@@ -136,10 +141,10 @@ public class AuthController extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		String token = (String) req.getSession().getAttribute("token");
+		Optional<String> token = getToken(req);
 
 		try {
-			if (token != null && Session.isValidSession(token)) {
+			if (token.isPresent() && Session.isValidSession(token.get())) {
 				WebUtils.pageRedirect(req, res, "home");
 				return;
 			}

@@ -25,410 +25,431 @@ import java.sql.Statement;
  */
 public class SQLDb implements Closeable {
 
-    private final String dbName;
-    private Connection dbConn;
+	private final String dbName;
+	private Connection dbConn;
 
-    /**
-     * Used to connect to an existing database
-     *
-     * @param dbName Database
-     * @throws java.sql.SQLException
-     */
-    public SQLDb(String dbName) throws SQLException {
-        this(dbName, "");
-    }
+	/**
+	 * Used to connect to an existing database
+	 *
+	 * @param dbName Database
+	 * @throws java.sql.SQLException
+	 */
+	public SQLDb(String dbName) throws SQLException {
+		this(dbName, "");
+	}
 
-    /**
-     * Used to connect to SQL database with custom modifiers in URL
-     * (e.g.';create=true')
-     *
-     * @param dbName Database name
-     * @param connectionURLAppend String to be appended to the URL connection
-     * string
-     * @throws java.sql.SQLException
-     */
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public SQLDb(String dbName, String connectionURLAppend) throws SQLException {
-        this.dbName = dbName;
-        setDbConn(connectionURLAppend);
-    }
+	/**
+	 * Used to connect to SQL database with custom modifiers in URL
+	 * (e.g.';create=true')
+	 *
+	 * @param dbName              Database name
+	 * @param connectionURLAppend String to be appended to the URL connection
+	 *                            string
+	 * @throws java.sql.SQLException
+	 */
+	@SuppressWarnings("OverridableMethodCallInConstructor")
+	public SQLDb(String dbName, String connectionURLAppend) throws SQLException {
+		this.dbName = dbName;
+		setDbConn(connectionURLAppend);
+	}
 
-    /**
-     * Shorthand to create new database and connect to it
-     *
-     * @param name DB Name
-     * @return Created/Existing database
-     * @throws java.sql.SQLException
-     */
-    public static SQLDb createNewDb(String name) throws SQLException {
-        try ( SQLDb db = new SQLDb("")) {
-            db.exec(format("CREATE DATABASE %s", name));
-        } catch (SQLException err) {
-            if (!err.getMessage().trim().endsWith("database exists")) {
-                throw err;
-            }
-        }
+	/**
+	 * Shorthand to create new database and connect to it
+	 *
+	 * @param name DB Name
+	 * @return Created/Existing database
+	 * @throws java.sql.SQLException
+	 */
+	public static SQLDb createNewDb(String name) throws SQLException {
+		try (SQLDb db = new SQLDb("")) {
+			db.exec(format("CREATE DATABASE %s", name));
+		} catch (SQLException err) {
+			if (!err.getMessage().trim().endsWith("database exists")) {
+				throw err;
+			}
+		}
 
-        return new SQLDb(name);
-    }
+		return new SQLDb(name);
+	}
 
-    // Statement executors (Shorthands) -----------------------------------------
-    /**
-     * Shorthand for creating a new table
-     *
-     * @param table Table information
-     * @throws java.sql.SQLException
-     */
-    public void createTable(SQLTableInfo table) throws SQLException {
-        exec(format("CREATE TABLE %s (%s)", table.getName(), table.getFullColumns()));
-    }
+	// Statement executors (Shorthands) -----------------------------------------
 
-    public void recreateTable(SQLTableInfo table) throws SQLException {
-        ignoreSQLErr(() -> dropTable(table));
-        createTable(table);
-    }
+	/**
+	 * Shorthand for creating a new table
+	 *
+	 * @param table Table information
+	 * @throws java.sql.SQLException
+	 */
+	public void createTable(SQLTableInfo table) throws SQLException {
+		exec(format("CREATE TABLE %s (%s)", table.getName(), table.getFullColumns()));
+	}
 
-    /**
-     * Shorthand to select all records from a table
-     *
-     * @param table Table information
-     * @return
-     * @throws java.sql.SQLException
-     */
-    public String[][] selectAllFromTable(SQLTableInfo table) throws SQLException {
-        return selectWhere(table, "1=1");
-    }
+	public void recreateTable(SQLTableInfo table) throws SQLException {
+		ignoreSQLErr(() -> dropTable(table));
+		createTable(table);
+	}
 
-    /**
-     * Selects records in the specified table that validates the where clause
-     *
-     * @param table Table information
-     * @param where SQL Statement for the "where" clause
-     * @param preparedValues Values used for prepared statement (can be left
-     * empty if not used)
-     * @return
-     * @throws java.sql.SQLException
-     */
-    public String[][] selectWhere(
-            SQLTableInfo table,
-            String where,
-            Object... preparedValues
-    ) throws SQLException {
-        ResultSet result = execPreparedWithResult(
-                // formats table name and where clause into SQL statement unsafely
-                format(
-                        "SELECT * FROM %s WHERE %s",
-                        table.getName(),
-                        where
-                ),
-                // safely stores prepared values into statement
-                preparedValues
-        );
+	/**
+	 * Shorthand to select all records from a table
+	 *
+	 * @param table Table information
+	 * @return
+	 * @throws java.sql.SQLException
+	 */
+	public String[][] selectAllFromTable(SQLTableInfo table) throws SQLException {
+		ResultSet result = execPreparedWithResult(format("SELECT * FROM %s", table.getName()));
 
-        // converts result set to arraylist then 2D array
-        return to2dArray(resultToList2D(result, table.getTableHeaders()));
-    }
+		// converts result set to arraylist then 2D array
+		return to2dArray(resultToList2D(result, table.getTableHeaders()));
+	}
 
-    /**
-     * Shorthand to drop a table from the database
-     *
-     * @param info Table Information
-     * @throws java.sql.SQLException
-     */
-    public void dropTable(SQLTableInfo info) throws SQLException {
-        dropTable(info.getName());
-    }
+	/**
+	 * Selects records in the specified table that validates the where clause
+	 *
+	 * @param table          Table information
+	 * @param where          SQL Statement for the "where" clause
+	 * @param preparedValues Values used for prepared statement (can be left
+	 *                       empty if not used)
+	 * @return
+	 * @throws java.sql.SQLException
+	 */
+	public String[][] selectWhere(
+					SQLTableInfo table,
+					String where,
+					Object... preparedValues
+	) throws SQLException {
+		ResultSet result = execPreparedWithResult(
+						// formats table name and where clause into SQL statement unsafely
+						format(
+										"SELECT * FROM %s WHERE %s",
+										table.getName(),
+										where
+						),
+						// safely stores prepared values into statement
+						preparedValues
+		);
 
-    /**
-     * Shorthand to drop a table from the database
-     *
-     * @param name Table name
-     * @throws java.sql.SQLException
-     */
-    public void dropTable(String name) throws SQLException {
-        exec(format("DROP TABLE %s", name));
-    }
+		// converts result set to arraylist then 2D array
+		return to2dArray(resultToList2D(result, table.getTableHeaders()));
+	}
 
-    /**
-     * Shorthand to insert values into a table (all columns)
-     *
-     * @param table Table to insert into
-     * @param vals Values to insert into table (order will match up to column)
-     * @throws java.sql.SQLException
-     */
-    public void insert(SQLTableInfo table, Object... vals) throws SQLException {
-        String prepared = "";
+	/**
+	 * Shorthand to drop a table from the database
+	 *
+	 * @param info Table Information
+	 * @throws java.sql.SQLException
+	 */
+	public void dropTable(SQLTableInfo info) throws SQLException {
+		dropTable(info.getName());
+	}
 
-        if (vals.length != 0) {
-            StringBuilder preparedBuilder = new StringBuilder();
-            // repeats ', ?' to prepared
-            for (int i = 0; i < table.getColumnCount(); i++) {
-                preparedBuilder.append(", ?");
-            }
-            prepared = preparedBuilder.substring(1);
-        }
+	/**
+	 * Shorthand to drop a table from the database
+	 *
+	 * @param name Table name
+	 * @throws java.sql.SQLException
+	 */
+	public void dropTable(String name) throws SQLException {
+		exec(format("DROP TABLE %s", name));
+	}
 
-        execPrepared(format("INSERT INTO %s VALUES (%s)", table.getName(), prepared.toString()), vals);
-    }
+	/**
+	 * Shorthand to insert values into a table (all columns)
+	 *
+	 * @param table Table to insert into
+	 * @param vals  Values to insert into table (order will match up to column)
+	 * @throws java.sql.SQLException
+	 */
+	public void insert(SQLTableInfo table, Object... vals) throws SQLException {
+		String prepared = "";
 
-    /**
-     * Shorthand for deleting information from a table that matches a where
-     * clause
-     *
-     * @param table Table to delete from
-     * @param condition Where clause to determine if row should be deleted (omit
-     * beginning WHERE)
-     * @param vals Prepared values to be substituted in query
-     * @throws java.sql.SQLException
-     */
-    public void deleteWhere(SQLTableInfo table, String condition, Object... vals)
-            throws SQLException {
-        execPrepared(format("DELETE FROM %s WHERE %s", table.getName(), condition), vals);
-    }
+		if (vals.length != 0) {
+			StringBuilder preparedBuilder = new StringBuilder();
+			// repeats ', ?' to prepared
+			for (int i = 0; i < table.getColumnCount(); i++) {
+				preparedBuilder.append(", ?");
+			}
+			prepared = preparedBuilder.substring(1);
+		}
 
-    public void updateWhere(SQLTableInfo table, String set, String where, Object... vals)
-            throws SQLException {
-        execPrepared(format("UPDATE %s SET %s WHERE %s", table.getName(), set, where), vals);
-    }
+		execPrepared(format("INSERT INTO %s VALUES (%s)", table.getName(), prepared.toString()), vals);
+	}
 
-    // Statement executors (Raw) ------------------------------------------------
-    /**
-     * Used to execute a prepared statement with no result
-     *
-     * @param statement SQL Statement to be executed
-     * @param vals Values to be substituted in statement
-     * @throws java.sql.SQLException
-     */
-    public void execPrepared(String statement, Object... vals) throws SQLException {
-        execPreparedWithResult(statement, vals);
-    }
+	/**
+	 * Shorthand for deleting information from a table that matches a where
+	 * clause
+	 *
+	 * @param table     Table to delete from
+	 * @param condition Where clause to determine if row should be deleted (omit
+	 *                  beginning WHERE)
+	 * @param vals      Prepared values to be substituted in query
+	 * @throws java.sql.SQLException
+	 */
+	public void deleteWhere(SQLTableInfo table, String condition, Object... vals)
+					throws SQLException {
+		execPrepared(format("DELETE FROM %s WHERE %s", table.getName(), condition), vals);
+	}
 
-    /**
-     * Used to execute prepared query & to retrieve result
-     *
-     * @param query SQL Statement to be executed
-     * @param vals Values to be substituted in statement
-     * @return
-     * @throws java.sql.SQLException
-     */
-    public ResultSet execPreparedWithResult(String query, Object... vals) throws SQLException {
-        PreparedStatement statement = dbConn.prepareStatement(query);
+	public void updateWhere(SQLTableInfo table, String set, String where, Object... vals)
+					throws SQLException {
+		execPrepared(format("UPDATE %s SET %s WHERE %s", table.getName(), set, where), vals);
+	}
 
-        for (int i = 0; i < vals.length; i++) {
-            statement.setObject(i + 1, vals[i]);
-        }
+	// Statement executors (Raw) ------------------------------------------------
 
-        // Prints to err stream if statement failed
-        try {
-            statement.execute();
-            debugPrintQuery(query);
-        } catch (SQLException e) {
-            debugPrintQueryErr(query);
-            throw e;
-        }
-        return statement.getResultSet();
-    }
+	/**
+	 * Used to execute a prepared statement with no result
+	 *
+	 * @param statement SQL Statement to be executed
+	 * @param vals      Values to be substituted in statement
+	 * @throws java.sql.SQLException
+	 */
+	public void execPrepared(String statement, Object... vals) throws SQLException {
+		execPreparedWithResult(statement, vals);
+	}
 
-    /**
-     * Executes SQL Query and returns result set
-     *
-     * @param query SQL Query to be executed
-     * @return
-     * @throws java.sql.SQLException
-     */
-    public ResultSet execWithResult(String query) throws SQLException {
-        Statement statement = dbConn.createStatement();
+	/**
+	 * Used to execute prepared query & to retrieve result
+	 *
+	 * @param query SQL Statement to be executed
+	 * @param vals  Values to be substituted in statement
+	 * @return
+	 * @throws java.sql.SQLException
+	 */
+	public ResultSet execPreparedWithResult(String query, Object... vals) throws SQLException {
+		PreparedStatement statement = dbConn.prepareStatement(query);
 
-        // Prints to err stream if statement failed
-        try {
-            statement.execute(query);
-            debugPrintQuery(query);
+		for (int i = 0; i < vals.length; i++) {
+			statement.setObject(i + 1, vals[i]);
+		}
 
-            // (if statement ran) returns result set
-            return statement.getResultSet();
-        } catch (SQLException e) {
-            debugPrintQueryErr(query);
+		// Prints to err stream if statement failed
+		try {
+			statement.execute();
+			debugPrintQuery(query);
+		} catch (SQLException e) {
+			debugPrintQueryErr(query);
+			throw e;
+		}
+		return statement.getResultSet();
+	}
 
-            // throws inside catch block just because I want to be able to log when the error
-            // happens above
-            throw e;
-        }
-    }
+	/**
+	 * Executes SQL Query and returns result set
+	 *
+	 * @param query SQL Query to be executed
+	 * @return
+	 * @throws java.sql.SQLException
+	 */
+	public ResultSet execWithResult(String query) throws SQLException {
+		Statement statement = dbConn.createStatement();
 
-    /**
-     * Executes SQL Statement and does not record result
-     *
-     * @param statement SQL Statement to be executed
-     * @throws java.sql.SQLException
-     */
-    public void exec(String statement) throws SQLException {
-        execWithResult(statement);
-    }
+		// Prints to err stream if statement failed
+		try {
+			statement.execute(query);
+			debugPrintQuery(query);
 
-    protected void debugPrintQuery(String q) {
-        debugPrintQuery(false, q);
-    }
+			// (if statement ran) returns result set
+			return statement.getResultSet();
+		} catch (SQLException e) {
+			debugPrintQueryErr(query);
 
-    protected void debugPrintQueryErr(String q) {
-        debugPrintQuery(true, q);
-    }
+			// throws inside catch block just because I want to be able to log when the error
+			// happens above
+			throw e;
+		}
+	}
 
-    protected void debugPrintQuery(boolean err, String q) {
-        PrintStream stream = err ? System.err : System.out;
+	/**
+	 * Executes SQL Statement and does not record result
+	 *
+	 * @param statement SQL Statement to be executed
+	 * @throws java.sql.SQLException
+	 */
+	public void exec(String statement) throws SQLException {
+		execWithResult(statement);
+	}
 
-        // debug prints the query
-        stream.printf("[derby@%s] %s%n", dbName, q);
-    }
+	protected void debugPrintQuery(String q) {
+		debugPrintQuery(false, q);
+	}
 
-    // Setters & Getters --------------------------------------------------------
-    public String getDbName() {
-        return dbName;
-    }
+	protected void debugPrintQueryErr(String q) {
+		debugPrintQuery(true, q);
+	}
 
-    public Connection getDbConn() {
-        return dbConn;
-    }
+	protected void debugPrintQuery(boolean err, String q) {
+		// debug prints the query
+		(err ? System.err : System.out).printf("[db@%s] %s%n", dbName, q);
+	}
 
-    public final void setDbConn() throws SQLException {
-        setDbConn("");
-    }
+	// Setters & Getters --------------------------------------------------------
+	public String getDbName() {
+		return dbName;
+	}
 
-    public final void setDbConn(String urlExtensions) throws SQLException {
-        String connectionURL = String.format("jdbc:mysql://localhost:%d/%s%s?useSSL=false", Db.PORT, dbName, urlExtensions);
-        dbConn = null;
+	public Connection getDbConn() {
+		return dbConn;
+	}
 
-        try {
+	public final void setDbConn() throws SQLException {
+		setDbConn("");
+	}
+
+	public final void setDbConn(String urlExtensions) throws SQLException {
+		String connectionURL = String.format("jdbc:mysql://localhost:%d/%s%s?useSSL=false", Db.PORT, dbName, urlExtensions);
+		dbConn = null;
+
+		try {
 //      Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            dbConn = DriverManager.getConnection(connectionURL, Db.SQL_USER, Db.SQL_PASS);
-        } catch (ClassNotFoundException ex) {
-            System.err.println("SQL Driver not found");
-        } catch (SQLSyntaxErrorException sse) {
-            sse.printStackTrace();
-        }
-    }
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			dbConn = DriverManager.getConnection(connectionURL, Db.SQL_USER, Db.SQL_PASS);
+		} catch (ClassNotFoundException ex) {
+			System.err.println("SQL Driver not found");
+		} catch (SQLSyntaxErrorException sse) {
+			sse.printStackTrace();
+		}
 
-    public ArrayList<ArrayList<String>> resultToList2D(ResultSet rs, String... tableHeaders) {
-        ArrayList<ArrayList<String>> data = new ArrayList<>();
+		if (true) return;
+		// literal actual jank
+		new Thread(() -> {
+			long start = System.currentTimeMillis();
 
-        try {
-            // loops through result query to store into data
-            while (rs.next()) {
-                ArrayList<String> row = new ArrayList<>();
+			while (System.currentTimeMillis() - start < 500) ;
+			try {
+				if (!dbConn.isClosed())
+					this.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}).start();
+	}
 
-                // loops through each column to add to record
-                for (String tableHeader : tableHeaders) {
-                    // gets data for column
-                    row.add(rs.getString(tableHeader));
-                }
+	public ArrayList<ArrayList<String>> resultToList2D(ResultSet rs, String... tableHeaders) {
+		ArrayList<ArrayList<String>> data = new ArrayList<>();
 
-                data.add(row); // adds column to row
-            }
-        } catch (SQLException se) {
-            System.err.println("SQL Err: Not able to get data");
-        }
+		try {
+			// loops through result query to store into data
+			while (rs.next()) {
+				ArrayList<String> row = new ArrayList<>();
 
-        return data;
-    }
+				// loops through each column to add to record
+				for (String tableHeader : tableHeaders) {
+					// gets data for column
+					row.add(rs.getString(tableHeader));
+				}
 
-    public void ignoreSQLErr(IgnoreSQLRunnable runnable) {
-        ignoreSQLErr(runnable, false);
-    }
+				data.add(row); // adds column to row
+			}
+		} catch (SQLException se) {
+			System.err.println("SQL Err: Not able to get data");
+		}
 
-    public void ignoreSQLErr(IgnoreSQLRunnable runnable, boolean debug) {
-        try {
-            runnable.run();
-        } catch (SQLException e) {
-            if (debug) {
-                e.printStackTrace();
-            }
-        }
-    }
+		return data;
+	}
 
-    @FunctionalInterface
-    public interface IgnoreSQLRunnable {
-        void run() throws SQLException;
-    }
+	public void ignoreSQLErr(IgnoreSQLRunnable runnable) {
+		ignoreSQLErr(runnable, false);
+	}
 
-    /**
-     * Is object connected to the database;
-     *
-     * @return
-     */
-    public boolean isConnected() {
-        if (dbConn == null) {
-            return false;
-        }
-        try {
-            return dbConn.isClosed();
-        } catch (SQLException e) {
-            return false;
-        }
-    }
+	public void ignoreSQLErr(IgnoreSQLRunnable runnable, boolean debug) {
+		try {
+			runnable.run();
+		} catch (SQLException e) {
+			if (debug) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-    /**
-     * Used to cleanly dispose of database connection, used when done with SQLDb
-     * object
-     */
-    @Override
-    public void close() {
-        if (isConnected()) {
-            try {
-                dbConn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+	@FunctionalInterface
+	public interface IgnoreSQLRunnable {
+		void run() throws SQLException;
+	}
 
-    // Static helper methods ----------------------------------------------------
-    /**
-     * Turns array into string with values seperated by comma (none trailing)
-     *
-     * @param arr Array to stringify
-     * @return
-     */
-    public static String toStringSeperatedByCommas(Object[] arr) {
-        // Empty array -> empty string
-        if (arr.length == 0) {
-            return "";
-        }
+	/**
+	 * Is object connected to the database;
+	 *
+	 * @return
+	 */
+	public boolean isConnected() {
+		if (dbConn == null) {
+			return false;
+		}
+		try {
+			return dbConn.isClosed();
+		} catch (SQLException e) {
+			return false;
+		}
+	}
 
-        // Creates %s for every object then formats them in
-        String formatIn = "";
-        for (int i = 0; i < arr.length; i++) {
-            formatIn += ",%s";
-        }
-        return String.format(
-                formatIn.substring(1), // removes leading comma
-                arr
-        );
-    }
+	/**
+	 * Used to cleanly dispose of database connection, used when done with SQLDb
+	 * object
+	 */
+	@Override
+	public void close() {
+		if (isConnected()) {
+			try {
+				dbConn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-    /**
-     * Converts rectangular 2D string array list into a rectangular 2D Array 
-     *
-     * @param data 2D Array list to convert, assumed to be not null
-     * @return
-     */
-    public static String[][] to2dArray(ArrayList<ArrayList<String>> data) {
-        if (data.isEmpty()) {
-            return new String[0][0];
-        }
+	// Static helper methods ----------------------------------------------------
 
-        String[][] arr = new String[data.size()][data.get(0).size()];
+	/**
+	 * Turns array into string with values seperated by comma (none trailing)
+	 *
+	 * @param arr Array to stringify
+	 * @return
+	 */
+	public static String toStringSeperatedByCommas(Object[] arr) {
+		// Empty array -> empty string
+		if (arr.length == 0) {
+			return "";
+		}
 
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = 0; j < data.get(0).size(); j++) {
-                arr[i][j] = data.get(i).get(j);
-            }
-        }
-        return arr;
-    }
+		// Creates %s for every object then formats them in
+		String formatIn = "";
+		for (int i = 0; i < arr.length; i++) {
+			formatIn += ",%s";
+		}
+		return String.format(
+						formatIn.substring(1), // removes leading comma
+						arr
+		);
+	}
 
-    public static void main(String[] args) throws SQLException {
-        SQLDb db = new SQLDb(Db.NAME);
-        System.out.println(Arrays.deepToString(db.selectAllFromTable(Db.USERS)));
-        db.close();
-    }
+	/**
+	 * Converts rectangular 2D string array list into a rectangular 2D Array
+	 *
+	 * @param data 2D Array list to convert, assumed to be not null
+	 * @return
+	 */
+	public static String[][] to2dArray(ArrayList<ArrayList<String>> data) {
+		if (data.isEmpty()) {
+			return new String[0][0];
+		}
+
+		String[][] arr = new String[data.size()][data.get(0).size()];
+
+		for (int i = 0; i < data.size(); i++) {
+			for (int j = 0; j < data.get(0).size(); j++) {
+				arr[i][j] = data.get(i).get(j);
+			}
+		}
+		return arr;
+	}
+
+	public static void main(String[] args) throws SQLException {
+		try (SQLDb db = new SQLDb(Db.NAME)) {
+			System.out.println(Arrays.deepToString(db.selectAllFromTable(Db.USERS)));
+		}
+
+		SQLDb db = new SQLDb(Db.NAME);
+		db.close();
+	}
 }

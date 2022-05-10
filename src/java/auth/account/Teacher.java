@@ -4,8 +4,6 @@ import db.Db;
 import db.SQLDb;
 import utils.Guard;
 
-import javax.swing.text.html.Option;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -14,7 +12,7 @@ public final class Teacher {
 	private final Account account;
 
 	public Teacher(Account account) {
-		Guard.againstNull(account);
+		Guard.forNull(account);
 
 		this.account = account;
 	}
@@ -54,7 +52,7 @@ public final class Teacher {
 	}
 
 	public static Teacher getFromAccount(Account account) throws SQLException {
-		Guard.againstNull(account);
+		Guard.forNull(account);
 
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			String[][] results = db.selectWhere(Db.TEACHERS, "uid=? LIMIT 1", account.getUid());
@@ -62,11 +60,11 @@ public final class Teacher {
 				throw new IllegalArgumentException(String.format("Account %s is not a teacher", account));
 
 			return new Teacher(account);
-		}
+		} 
 	}
 
 	public static boolean isTeacher(Account account) throws SQLException {
-		Guard.againstNull(account);
+		Guard.forNull(account);
 
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			return db.selectWhere(Db.TEACHERS, "uid=? LIMIT 1", account.getUid()).length > 0;

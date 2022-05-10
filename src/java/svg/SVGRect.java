@@ -5,26 +5,21 @@
 package svg;
 
 /**
- *
  * @author bishan
  */
-public class SVGRect extends SVGObject<SVGRect>
-{
+public class SVGRect extends SVGObject<SVGRect> {
 
-  public SVGRect()
-  {
-    super("rect");
-  }
+	public SVGRect() {
+		super("rect");
+	}
 
-  public SVGRect at(double x, double y)
-  {
-    writeProperty("x", x);
-    return writeProperty("y", y);
-  }
+	public SVGRect at(double x, double y) {
+		writeProperty("x", x);
+		return writeProperty("y", y);
+	}
 
-  public SVGRect size(double x, double y)
-  {
-    writeProperty("width", x);
-    return writeProperty("height", y);
-  }
+	public SVGRect size(double x, double y) {
+		writeProperty("width", x);
+		return writeProperty("height", y);
+	}
 }

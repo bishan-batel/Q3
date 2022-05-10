@@ -3,20 +3,18 @@ const onScroll = () => document
     .forEach((ele) => {
         const windowHeight = window.innerHeight;
         const elementTop = ele.getBoundingClientRect().top;
-        let elementVisible = 150;
+        let margin = 150;
 
         try {
             let offset = ele.getAttribute("reveal-offset");
-            if (typeof (offset) == "number") elementVisible += parseFloat(offset);
+            if (typeof (offset) == "number") margin += parseFloat(offset);
         } catch (e) {
             console.error(e);
         }
 
-        if (elementTop < windowHeight - elementVisible) {
-            // randomizeSkew(ele)
+        if (elementTop < windowHeight - margin) {
             ele.classList.add("active");
         } else {
-            // if (ele.classList.contains("active")) randomizeSkew(ele)
             ele.classList.remove("active");
         }
     });

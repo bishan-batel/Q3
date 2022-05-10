@@ -10,7 +10,7 @@ import java.util.UUID;
 public final class WebUtils {
 
 	/**
-	 * Generates a random 32 char string UUID
+	 * Returns a random 32 char string UUID
 	 */
 	public static String randomUID() {
 		return UUID.randomUUID().toString().replace("-", "");
@@ -32,6 +32,12 @@ public final class WebUtils {
 					throws ServletException, IOException {
 		req.getServletContext().setAttribute("redirectTo", to);
 		req.getRequestDispatcher(webInf("redirecter.jsp")).forward(req, res);
+	}
+
+	public static double truncate(double v, int decimals) {
+		if (decimals == 0) return Math.round(v);
+		double pow = Math.pow(10, decimals);
+		return Math.round(v * pow) / pow;
 	}
 
 	private WebUtils() {

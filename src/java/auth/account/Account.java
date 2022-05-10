@@ -47,6 +47,10 @@ public class Account {
 		return firstName;
 	}
 
+	public String getFullName() {
+		return String.format("%s %s", getFirstName(), getLastName());
+	}
+
 	public String getLastName() {
 		return lastName;
 	}
@@ -69,6 +73,7 @@ public class Account {
 	public static Optional<Account> getFromId(String id) throws SQLException {
 		try (SQLDb db = new SQLDb(NAME)) {
 			String[][] res = db.selectWhere(USERS, "id=?", id);
+			db.close();
 			if (res.length == 0) return Optional.empty();
 			return Optional.of(new Account(res[0]));
 		}

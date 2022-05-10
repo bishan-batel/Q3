@@ -14,6 +14,11 @@ public final class Student {
 	@Deprecated
 	private int score;
 
+	Student(String[] row) throws SQLException {
+		classroomId = Db.STUDENTS.getString(row, "classroomId");
+		score = Integer.parseInt(Db.STUDENTS.getString(row, "score"));
+		account = Account.getFromId(Db.STUDENTS.getString(row, "uid")).orElseThrow(IllegalArgumentException::new);
+	}
 
 	Student(Account account, String[] row) {
 		this.account = account;
@@ -62,9 +67,16 @@ public final class Student {
 		}
 	}
 
+	/**
+	 * C
+	 *
+	 * @param classroomId ID of the classroom to join
+	 * @throws SQLException
+	 */
 	public void sendJoinRequest(String classroomId) throws SQLException {
+		boolean hasJoinRequest = getJoinRequest().isPresent();
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			if (hasPendingJoinRequest(db)) {
+			if (hasJoinRequest) {
 				db.updateWhere(Db.JOIN_REQUESTS, "classroomId=?", "uid=?", classroomId, getUid());
 			} else {
 				db.insert(Db.JOIN_REQUESTS, getUid(), classroomId);
@@ -72,15 +84,20 @@ public final class Student {
 		}
 	}
 
-	private boolean hasPendingJoinRequest(SQLDb db) throws SQLException {
-		return db.selectWhere(Db.JOIN_REQUESTS, "uid=? LIMIT 1", getUid()).length == 0;
+	public Optional<JoinRequest> getJoinRequest() throws SQLException {
+		try (SQLDb db = new SQLDb(Db.NAME)) {
+			String[][] res = db.selectWhere(Db.JOIN_REQUESTS, "uid=? LIMIT 1", getUid());
+			if (res.length == 0) return Optional.empty();
+			return Optional.of(new JoinRequest(res[0]));
+		}
 	}
 
 	public static Student getFromAccount(Account account) throws SQLException {
-		Guard.againstNull(account);
+		Guard.forNull(account);
 
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			String[][] results = db.selectWhere(Db.STUDENTS, "uid=? LIMIT 1", account.getUid());
+			db.close();
 			if (results.length == 0)
 				throw new IllegalArgumentException(String.format("Account %s is not a student", account));
 
@@ -89,10 +106,12 @@ public final class Student {
 	}
 
 	public static boolean isStudent(Account account) throws SQLException {
-		Guard.againstNull(account);
+		Guard.forNull(account);
 
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			return db.selectWhere(Db.STUDENTS, "uid=? LIMIT 1", account.getUid()).length > 0;
+			boolean b = db.selectWhere(Db.STUDENTS, "uid=? LIMIT 1", account.getUid()).length > 0;
+			db.close();
+			return b;
 		}
 	}
 

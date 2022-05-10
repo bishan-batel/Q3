@@ -2,7 +2,7 @@
 <%--@elvariable id="account" type="auth.account.Account"--%>
 <%--@elvariable id="classrooms" type="auth.account.Classroom[]"--%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@page contentType="text/html" pageEncoding="UTF-8" errorPage="err.jsp" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
@@ -14,17 +14,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="css/home.teacher.css"/>
     <script defer src="js/global.js"></script>
-    <script defer src="js/home.teacher.js"></script>
 </head>
 <body>
+<%@include file="components/indicators.jsp" %>
 <main>
-    <%@include file="components/accountBar.component.jsp" %>
-    <%@include file="components/indicators.jsp" %>
-
     <ul id="classroomList">
         <c:forEach var="classroom" items="${classrooms}">
-            <li class="classroom">
-                <span class="classroomId" hidden>${classroom.id}</span>
+            <li
+                    class="classroom"
+                    onclick="window.location.href ='/Q3/classroom?id=${classroom.id}'"
+            >
                 <h2>
                     <c:out value="${classroom.name}"/>
                 </h2>
@@ -33,8 +32,9 @@
                     <c:catch var="studentCountFailure">
                         <c:out value="${classroom.studentCount}"/> Students
                     </c:catch>
-                    <c:if test="${studentCountFailure !=null}">
+                    <c:if test="${studentCountFailure != null}">
                         Failed to get student count
+                        ${studentCountFailure.printStackTrace()}
                     </c:if>
                 </span>
             </li>
@@ -90,7 +90,7 @@
                 <input type="submit" value="Delete"/>
             </form>
             <button class="closeButton"
-                    onclick="document.querySelector('#create-classroom').close()"
+                    onclick="document.querySelector('#delete-classroom').close()"
             >
                 Close
             </button>
@@ -98,5 +98,6 @@
         </dialog>
     </c:if>
 </main>
+<%@include file="components/accountBar.component.jsp" %>
 </body>
 </html>

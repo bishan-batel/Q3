@@ -67,9 +67,18 @@ public final class Db {
 					"type varchar(256) NOT NULL",
 					"minimumQuestions int NOT NULL",
 					"minimumAccuracy double NOT NULL",
-					"dateDue datetime",
-					"dateAdded datetime NOT NULL"
+					"dateDue date",
+					"dateAdded date NOT NULL"
 	);
+
+	public static final SQLTableInfo ASSIGNMENT_LOGS = new SQLTableInfo(
+					"AssignmentLogs",
+					"assignmentId varchar(32) NOT NULL",
+					"studentId varchar(32) NOT NULL",
+					"didCorrect int NOT NULL",
+					"completedDate date NOT NULL"
+	);
+
 
 	public static void main(String[] args) throws SQLException {
 		SQLDb.createNewDb(NAME).close();

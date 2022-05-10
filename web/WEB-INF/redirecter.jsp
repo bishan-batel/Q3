@@ -1,6 +1,6 @@
 <%--@elvariable id="redirectTo" type="java.lang.String"--%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@page contentType="text/html" pageEncoding="UTF-8" errorPage="err.jsp" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>

@@ -1,0 +1,154 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+main {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    top: 0;
+
+    background: url("../images/blob/blob1.svg") center;
+    background-size: cover;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+a {
+    text-decoration: inherit;
+    color: inherit;
+}
+
+#delete-classroom {
+    position: fixed;
+    right: 0;
+    top: 8rem;
+    background: #d93663;
+    margin: 0;
+    padding: 0;
+    transition: 150ms ease-in-out;
+}
+
+#delete-classroom > input {
+    color: var(--font-color);
+    background: none;
+    border: none;
+}
+
+#delete-classroom:hover {
+    background: #b32f53;
+    cursor: pointer;
+}
+
+#classTitle {
+    position: absolute;
+    top: 5.5rem;
+    text-align: center;
+    font-size: 3rem;
+}
+
+#create-assignment > form {
+    display: flex;
+    /*justify-content: center;*/
+    flex-direction: column;
+    align-items: center;
+}
+
+#students {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem;
+    padding: 1rem;
+
+    background: url("../images/blob/blob3.svg") center;
+    background-size: cover;
+    border-radius: 10px;
+    min-width: 20rem;
+    min-height: 20rem;
+}
+
+#students h2 {
+    text-align: center;
+    border-bottom: solid var(--font-color) 2px;
+    width: auto;
+    border-radius: 5px;
+    font-size: 2rem;
+    padding: .1rem;
+}
+
+.student {
+    font-size: 1.5rem;
+}
+
+#confirmed-students {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+#requesting-students {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+    width: 100%;
+}
+
+.request {
+    border-left: solid var(--font-color) 3px;
+    border-radius: 5px;
+    padding: .1rem;
+    font-size: 1.5rem;
+    width: 100%;
+}
+
+.request > input[type="submit"] {
+    border: none;
+    border-radius: 5px;
+    color: var(--font-color);
+    font-size: inherit;
+
+    min-width: 1.5em;
+    min-height: 1.5em;
+    max-width: 1.5em;
+    max-height: 1.5em;
+
+    transition: 150ms ease-in-out;
+}
+
+.request > input[type="submit"]:hover {
+    cursor: pointer;
+}
+
+.request > input[type="submit"]:nth-of-type(1n) {
+    background: #d93663;
+}
+
+.request > input[type="submit"]:nth-of-type(2n) {
+    background: #49e4a1;
+}
+
+.request > input[type="submit"]:nth-of-type(1n):hover {
+    background: #b32f53;
+}
+
+.request > input[type="submit"]:nth-of-type(2n):hover {
+    background: #38b680;
+}
+
+#assignments {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.assignment {
+    font-size: 1.6rem;
+}
