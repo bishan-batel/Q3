@@ -41,6 +41,7 @@ public class AuthController extends HttpServlet {
 				break;
 			case "/logout":
 				handleLogout(req, res);
+
 			default:
 				WebUtils.pageRedirect(req, res, "account");
 		}

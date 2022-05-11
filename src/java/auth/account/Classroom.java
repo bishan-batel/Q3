@@ -43,9 +43,11 @@ public class Classroom {
 
 	public JoinRequest[] getJoinRequests() throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			return Arrays.stream(db.selectWhere(Db.JOIN_REQUESTS, "classroomId=?", getId()))
+			JoinRequest[] req = Arrays.stream(db.selectWhere(Db.JOIN_REQUESTS, "classroomId=?", getId()))
 							.map(JoinRequest::new)
 							.toArray(JoinRequest[]::new);
+			db.close();
+			return req;
 		}
 	}
 
@@ -56,6 +58,7 @@ public class Classroom {
 							"classroomId=?",
 							getId()
 			);
+			db.close();
 
 			// I would use streams for this but the student constructor having an
 			// exception mucks things up
@@ -94,11 +97,9 @@ public class Classroom {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			result = db.selectWhere(Db.ASSIGNMENTS, "classroomId=? ORDER BY dateDue DESC", getId());
 		}
+		System.out.println(Arrays.deepToString(result));
 		return Arrays.stream(result)
-						.map(r -> {
-							System.out.println(Arrays.deepToString(r));
-							return new Assignment(r);
-						})
+						.map(Assignment::new)
 						.toArray(Assignment[]::new);
 	}
 

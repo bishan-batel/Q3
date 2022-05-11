@@ -29,14 +29,14 @@
         <input type="submit" value="Delete"/>
     </form>
 
-    <table id="student">
+    <table id="students">
         <tr>
             <th>Student</th>
             <th>Completed</th>
 
             <fmt:formatNumber var="num" value="${assignment.minimumAccuracy*100}"
                               maxFractionDigits="1"/>
-            <th>Accuracy >${num})</th>
+            <th>Accuracy (>${num})</th>
             <th>Questions Done</th>
         </tr>
         <c:forEach var="student" items="${assignment.classroom.students}">

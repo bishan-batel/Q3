@@ -65,7 +65,9 @@ public final class Session {
 
 	public static boolean isValidSession(String token) throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			return db.selectWhere(Db.SESSIONS, "token=? LIMIT 1", token).length > 0;
+			boolean b = db.selectWhere(Db.SESSIONS, "token=? LIMIT 1", token).length > 0;
+			db.close();
+			return b;
 		}
 	}
 }

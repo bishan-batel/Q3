@@ -269,13 +269,13 @@ public class HomeController extends HttpServlet {
 
 			// validating the input
 			Guard.forNullOrWhitespace(classroomId);
-			Guard.whitelist(type, (Object[]) Arrays.stream(ProblemType.values()).map(ProblemType::name).toArray(String[]::new));
+			Guard.whitelist(type, (Object[]) Arrays.stream(ProblemType.values()).map(ProblemType::toString).toArray(String[]::new));
 			Guard.forRangeInclusive(minQuestions, 1, 100);
 			Guard.forRangeInclusive(minAccuracy, 0, 1);
 
 			if (!teacher.ownsClassroom(classroomId)) throw new UnauthorizedException();
 			Classroom classroom = Classroom.getById(classroomId).orElseThrow(IllegalArgumentException::new);
-			Assignment.createFor(classroom, ProblemType.valueOf(type), minQuestions, minAccuracy, dueDate);
+			Assignment.createFor(classroom, ProblemType.tryParse(type).orElseThrow(RuntimeException::new), minQuestions, minAccuracy, dueDate);
 			WebUtils.setError(req, null);
 		} catch (NullPointerException | IllegalArgumentException e) {
 			WebUtils.setError(req, "Invalid form data");
@@ -318,7 +318,6 @@ public class HomeController extends HttpServlet {
 				if (Student.isStudent(acc))
 					handleStudentGet(req, res, Student.getFromAccount(acc));
 				else handleTeacherGet(req, res, Teacher.getFromAccount(acc));
-
 				return;
 			}
 

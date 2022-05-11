@@ -3,12 +3,14 @@ package question.generators;
 import math.Triangle;
 import math.Vector2;
 import question.Problem;
+import question.QuestionData;
 import svg.SVGBuilder;
 import svg.SVGPath;
 import svg.SVGStyle;
 import svg.SVGText;
 import utils.WebUtils;
 
+@QuestionData(name = "Pythag Problem")
 public class PythagThereomProblem extends Problem {
 	private enum Variable {
 		A, B, C

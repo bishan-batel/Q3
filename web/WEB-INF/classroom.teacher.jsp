@@ -97,7 +97,7 @@
                             var="problem"
                             items="<%=ProblemType.values()%>"
                     >
-                        <option value="${problem.name()}">
+                        <option value="${problem.toString()}">
                             <c:out value="${problem.toString()}"/>
                         </option>
                     </c:forEach>

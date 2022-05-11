@@ -50,3 +50,32 @@ a {
     text-align: center;
     font-size: 3rem;
 }
+
+#students {
+    font-size: 1.6rem;
+}
+
+#students th {
+    font-size: 2rem;
+}
+
+#students th, #students td {
+    margin: 0;
+    border: solid var(--font-color) 2px;
+}
+
+#students tr td:nth-of-type(1n) {
+    background: var(--color0);
+}
+
+#students tr td:nth-of-type(2n) {
+    background: var(--color1);
+}
+
+#students tr td:nth-of-type(3n) {
+    background: var(--color2);
+}
+
+#students tr td:nth-of-type(4n) {
+    background: var(--color3);
+}

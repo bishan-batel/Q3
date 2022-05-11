@@ -1,28 +1,63 @@
 package question;
 
-import question.generators.PythagThereomProblem;
-import question.generators.SinusoidalGraphProblem;
-
-import java.util.Arrays;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author bishan
  */
-public enum ProblemType {
-	SINUSOIDAL_GRAPH("Analyzing sinusoidal graphs", SinusoidalGraphProblem::new),
-	PYTHAG_THEREOM("Pythagorous's Theorom", PythagThereomProblem::new),
-//	RIGHT_TRIANGLE_RATIOS("Special Right Triangle Problems", TestProblem::new),
-//	RIGHT_TRIANGLE("Right Triangle Problems", TestProblem::new),
+public final class ProblemType {
+	private static final ProblemType[] values;
+	private static final String PROBLEM_PACKAGE = "problem.generators";
 
-	DEBUG_TEST("Test Problem", TestProblem::new);
+	static {
+		// legit the worst code i've ever written
+		InputStream stream = ClassLoader.getSystemClassLoader()
+						.getResourceAsStream(PROBLEM_PACKAGE.replaceAll("[.]", "/"));
+		assert stream != null;
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
+		values = reader.lines()
+						.filter(line -> line.endsWith(".class"))
+						.map(line -> {
+							try {
+								return Class.forName(PROBLEM_PACKAGE + "." + line.substring(0, line.lastIndexOf('.')));
+							} catch (ClassNotFoundException ignored) {
+								return null;
+							}
+						})
+						.filter(Objects::nonNull)
+						.filter(c -> c.isAssignableFrom(Problem.class))
+						.map(c -> (Class<? extends Problem>) c)
+						.map(c -> {
+							QuestionData meta = c.getAnnotation(QuestionData.class);
+
+							return new ProblemType(meta.name(), () -> {
+								try {
+									return c.getConstructor().newInstance();
+								} catch (Exception e) {
+									e.printStackTrace();
+									return null;
+								}
+							});
+						})
+						.toArray(ProblemType[]::new);
+
+	}
+
+
 	// Enum Instance
 	private final String readableName;
 	private final ProblemGenerator generator;
 
-	ProblemType(String name, ProblemGenerator generator) {
+	private ProblemType(String name, ProblemGenerator generator) {
 		this.readableName = name;
 		this.generator = generator;
+
 	}
 
 	public Problem generate() {
@@ -40,18 +75,15 @@ public enum ProblemType {
 	 * Attempts
 	 */
 	public static Optional<ProblemType> tryParse(String from) {
-		if (from == null) return Optional.empty();
-		try {
-			return Optional.of(valueOf(from));
-		} catch (IllegalArgumentException e) {
-			return Arrays.stream(values())
-							.filter(t -> t.toString().equalsIgnoreCase(from))
-							.findFirst();
-		}
+		return Arrays.stream(values).filter(v -> v.readableName.equalsIgnoreCase(from)).findFirst();
 	}
 
 	@FunctionalInterface
 	private interface ProblemGenerator {
 		Problem createProblem();
+	}
+
+	public static ProblemType[] values() {
+		return values;
 	}
 }

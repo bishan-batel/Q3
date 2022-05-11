@@ -325,8 +325,11 @@ public class SQLDb implements Closeable {
 		}).start();
 	}
 
-	public ArrayList<ArrayList<String>> resultToList2D(ResultSet rs, String... tableHeaders) {
-		ArrayList<ArrayList<String>> data = new ArrayList<>();
+	/**
+	 * Converts a result set into a table 2D list
+	 */
+	public ArrayList<ArrayList<String>> resultToList2D(ResultSet rs, String... tableHeaders) throws SQLException {
+		ArrayList<ArrayList<String>> buff2 = new ArrayList<>();
 
 		try {
 			// loops through result query to store into data
@@ -339,13 +342,14 @@ public class SQLDb implements Closeable {
 					row.add(rs.getString(tableHeader));
 				}
 
-				data.add(row); // adds column to row
+				buff2.add(row); // adds column to row
 			}
 		} catch (SQLException se) {
 			System.err.println("SQL Err: Not able to get data");
 		}
 
-		return data;
+		rs.close();
+		return buff2;
 	}
 
 	public void ignoreSQLErr(IgnoreSQLRunnable runnable) {
@@ -369,8 +373,6 @@ public class SQLDb implements Closeable {
 
 	/**
 	 * Is object connected to the database;
-	 *
-	 * @return
 	 */
 	public boolean isConnected() {
 		if (dbConn == null) {
@@ -413,10 +415,10 @@ public class SQLDb implements Closeable {
 		}
 
 		// Creates %s for every object then formats them in
-		String formatIn = "";
-		for (int i = 0; i < arr.length; i++) {
-			formatIn += ",%s";
-		}
+		StringBuilder formatIn = new StringBuilder();
+		for (int i = 0; i < arr.length; i++)
+			formatIn.append(",%s");
+
 		return String.format(
 						formatIn.substring(1), // removes leading comma
 						arr
@@ -451,5 +453,10 @@ public class SQLDb implements Closeable {
 
 		SQLDb db = new SQLDb(Db.NAME);
 		db.close();
+	}
+
+	@Override
+	protected void finalize() {
+		this.close();
 	}
 }

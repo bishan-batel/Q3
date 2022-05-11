@@ -8,7 +8,6 @@ import utils.WebUtils;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -45,7 +44,7 @@ public class Assignment {
 	) {
 		this.id = id;
 		this.classroomId = classroomId;
-		this.type = ProblemType.tryParse(type).orElse(ProblemType.SINUSOIDAL_GRAPH);
+		this.type = ProblemType.tryParse(type).orElseThrow(() -> new RuntimeException("Invalid Type"));
 		this.minimumQuestions = minimumQuestions;
 		this.minimumAccuracy = minimumAccuracy;
 		this.dateAdded = dateAdded;
@@ -97,7 +96,7 @@ public class Assignment {
 							),
 							getId(),
 							studentId,
-							getDateDue()
+							getDateDue() 
 			);
 
 			db.close();
@@ -159,7 +158,7 @@ public class Assignment {
 							Db.ASSIGNMENTS,
 							id,
 							classroom.getId(),
-							type.name(),
+							type.toString(),
 							minimumQuestions,
 							minimumAccuracy,
 							dateDue,

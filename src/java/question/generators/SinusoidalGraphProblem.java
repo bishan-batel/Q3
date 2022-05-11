@@ -1,6 +1,7 @@
 package question.generators;
 
 import question.Problem;
+import question.QuestionData;
 import svg.*;
 import utils.WebUtils;
 
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+@QuestionData(name = "Sin graph problems")
 public class SinusoidalGraphProblem extends Problem {
 	private WaveType waveType;
 	private double decimalCorrect;

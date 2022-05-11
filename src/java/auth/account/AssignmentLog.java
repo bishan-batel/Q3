@@ -60,8 +60,10 @@ public class AssignmentLog {
 							studentId,
 							assignment.getDateDue()
 			);
+			db.close();
 			return Arrays.stream(results)
 							.map(AssignmentLog::new)
+
 							.toArray(AssignmentLog[]::new);
 		}
 	}

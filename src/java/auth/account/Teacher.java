@@ -28,13 +28,16 @@ public final class Teacher {
 
 	public boolean ownsClassroom(String classroomId) throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			return db.selectWhere(Db.CLASSROOMS, "ownerId=? AND id=? LIMIT 1", getUid(), classroomId).length > 0;
+			boolean b = db.selectWhere(Db.CLASSROOMS, "ownerId=? AND id=? LIMIT 1", getUid(), classroomId).length > 0;
+			db.close();
+			return b;
 		}
 	}
 
 	public Classroom[] getClassrooms() throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			String[][] results = db.selectWhere(Db.CLASSROOMS, "ownerId=?", account.getUid());
+			db.close();
 
 			// maps results to array of Classroom objects
 			return Arrays.stream(results).map(Classroom::new).toArray(Classroom[]::new);
@@ -44,7 +47,7 @@ public final class Teacher {
 	public Optional<Classroom> getClassroomById(String id) throws SQLException {
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			String[][] results = db.selectWhere(Db.CLASSROOMS, "ownerId=? AND id=? LIMIT 1", account.getUid(), id);
-
+			db.close();
 			if (results.length == 0)
 				return Optional.empty();
 			return Optional.of(new Classroom(results[0]));
@@ -56,18 +59,21 @@ public final class Teacher {
 
 		try (SQLDb db = new SQLDb(Db.NAME)) {
 			String[][] results = db.selectWhere(Db.TEACHERS, "uid=? LIMIT 1", account.getUid());
+			db.close();
 			if (results.length == 0)
 				throw new IllegalArgumentException(String.format("Account %s is not a teacher", account));
 
 			return new Teacher(account);
-		} 
+		}
 	}
 
 	public static boolean isTeacher(Account account) throws SQLException {
 		Guard.forNull(account);
 
 		try (SQLDb db = new SQLDb(Db.NAME)) {
-			return db.selectWhere(Db.TEACHERS, "uid=? LIMIT 1", account.getUid()).length > 0;
+			boolean b = db.selectWhere(Db.TEACHERS, "uid=? LIMIT 1", account.getUid()).length > 0;
+			db.close();
+			return b;
 		}
 	}
 
